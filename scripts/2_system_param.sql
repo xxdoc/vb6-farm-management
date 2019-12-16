@@ -1,0 +1,42 @@
+
+CREATE TABLE SYSTEM_PARAM
+(
+   PARAM_ID              ID_TYPE NOT NULL,
+   PARAM_NAME            CODE_TYPE NOT NULL,
+   PARAM_TYPE            VAR_TYPE NOT NULL,
+   PARAM_VALUE           DESC_TYPE,
+   PARAM_DEFAULT         DESC_TYPE,
+   PARAM_DESC            DESC_TYPE,
+
+   CREATE_DATE           DATE_TYPE NOT NULL,
+   CREATE_BY             ID_TYPE NOT NULL,
+   MODIFY_DATE           DATE_TYPE NOT NULL,
+   MODIFY_BY             ID_TYPE NOT NULL
+);
+
+INSERT INTO SYSTEM_PARAM
+(
+   PARAM_ID,
+   PARAM_NAME,
+   PARAM_TYPE,
+   PARAM_VALUE,
+   PARAM_DEFAULT,
+   PARAM_DESC,
+   CREATE_DATE,
+   CREATE_BY,
+   MODIFY_DATE,
+   MODIFY_BY
+)
+VALUES
+(
+   GEN_ID(SYSTEM_PARAM_SEQ, 1),
+   'DUMMY_PARAM',
+   'S',
+   '',
+   '',
+   'For generate sequence',
+   '2004-08-26 18:21:34',
+   0,
+   '2004-08-26 18:21:34',
+   0
+);

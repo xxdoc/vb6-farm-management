@@ -1,0 +1,19 @@
+
+CREATE TABLE ENTERPRISE
+(
+   ENTERPRISE_ID        ID_TYPE NOT NULL,
+   BUSINESS_TYPE        ID_TYPE,
+   EMAIL                EMAIL_TYPE,
+   WEBSITE              EMAIL_TYPE,
+   TAX_ID               TAXID_TYPE,
+   SETUP_DATE           DATE_TYPE,
+   POLICY               DESC_TYPE,
+   ENTERPRISE_TYPE      ID_TYPE,
+   BRANCH_CODE          CODE_TYPE,
+   BRANCH_NAME          NAME_TYPE,
+
+   CREATE_DATE          DATE_TYPE NOT NULL,
+   CREATE_BY            ID_TYPE NOT NULL,
+   MODIFY_DATE          DATE_TYPE NOT NULL,
+   MODIFY_BY            ID_TYPE NOT NULL
+);

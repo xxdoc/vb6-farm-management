@@ -1,0 +1,6 @@
+      Call MsgBox("กรุณาเลือกข้อมูลให้มีค่าปัจจุบัน 1 รายการ", vbOKOnly, PROJECT_NAME)
+      frmDBSetting.Header = " ไม่สามารถเชื่อต่อฐานข้อมูลได้ "
+'      frmAgentSetting.Header = " ไม่สามารถเชื่อมต่อกับไลเซนส์เซิร์ฟเวอร์ได้ "
+   C.AddItem ("")
+   C.AddItem ("น้อยไปมาก")
+   C.AddItem ("มากไปน้อย")

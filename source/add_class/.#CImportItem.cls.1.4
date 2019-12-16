@@ -1,0 +1,2202 @@
+VERSION 1.0 CLASS
+BEGIN
+  MultiUse = -1  'True
+  Persistable = 0  'NotPersistable
+  DataBindingBehavior = 0  'vbNone
+  DataSourceBehavior  = 0  'vbNone
+  MTSTransactionMode  = 0  'NotAnMTSObject
+END
+Attribute VB_Name = "CImportItem"
+Attribute VB_GlobalNameSpace = False
+Attribute VB_Creatable = True
+Attribute VB_PredeclaredId = False
+Attribute VB_Exposed = False
+Option Explicit
+
+Private m_Conn As ADODB.Connection
+
+Public AddEditMode As SHOW_MODE_TYPE
+Public QueryFlag As Long
+Public OrderBy As Long
+Public OrderType As Long
+Public Flag As String
+' End of generic data member
+
+Public IMPORT_ITEM_ID As Long
+Public INVENTORY_DOC_ID As Long
+Public PART_ITEM_ID As Long
+Public LOCATION_ID As Long
+Public ACTUAL_UNIT_PRICE As Double
+Public INCLUDE_UNIT_PRICE As Double
+Public PREVIOUS_PRICE As Double
+Public PREVIOUS_AMOUNT As Double
+Public NEW_PRICE As Double
+Public IMPORT_AMOUNT As Double
+Public CURRENT_AMOUNT As Double
+Public TRANSACTION_SEQ As Long
+Public GUI_ID As Long
+Public CALCULATE_FLAG As String
+Public FATHER_NO As String
+Public MOTHER_NO As String
+Public TOTAL_WEIGHT As Double
+Public TOTAL_ACTUAL_PRICE As Double
+Public TOTAL_INCLUDE_PRICE As Double
+Public BIRTH_DATE As Date
+Public EXPENSE_TYPE As Long
+Public PIG_STATUS As Long
+Public HOUSE_GROUP_ID As Long
+Public REPLACE_FLAG As String
+Public ACTUAL_AMOUNT As Double
+Public ACTUAL_PRICE As Double
+Public INTAKE_TYPE As Long
+
+Public IMPORT_DESC As String
+
+Public SIMULATE_FLAG As String
+Public PARENT_ID As Long
+Public OLD_PARENT_ID As Long
+Public TX_TYPE As String
+Public PART_NO As String
+Public PART_DESC As String
+Public PART_TYPE As Long
+Public PART_TYPE_NAME As String
+Public PART_TYPE_NO As String
+Public LOCATION_NO As String
+Public LOCATION_NAME As String
+Public OLD_IMPORT_AMOUNT As Double
+Public OLD_LOCATION_ID As Long
+Public PIG_TYPE As String
+Public UNIT_NAME As String
+Public DOCUMENT_DATE As Date
+Public COMMIT_FLAG As String
+Public DOCUMENT_TYPE As Long
+Public PIG_FLAG As String
+Public SUM_ALL_IMPORT_AMT As Double
+Public SUM_ALL_IMPORT As Double
+Public SALE_FLAG As String
+Public DOCUMENT_NO As String
+Public INTAKE_FLAG As String
+Public YYYYMM2 As String
+Public YYYYMM As String
+Public FROM_TX_SEQ As Long
+Public TO_TX_SEQ As Long
+Public PRIORITY1 As Long
+Public FROM_DATE As Date
+Public TO_DATE As Date
+Public FROM_DATE1 As Date
+Public PART_ITEM_ID1 As Long
+Public LOCATION_ID1 As Long
+Public PARENT_FLAG As String
+Public HOUSE_SALE_FLAG As String
+Public FROM_GUI_ID As Long
+Public TO_GUI_ID As Long
+Public BATCH_ID As Long
+Public CUS_ID As Long
+Public FEED_GROUP As Long
+Public PART_GROUP As Long
+
+Public ALL_IMPORT_AMT As Double
+Public ALL_EXPORT_AMT As Double
+Public BAL_IMPORT_AMT As Double
+Public BAL_EXPORT_AMT As Double
+Public BALANCE_AMOUNT As Double
+Public SUPPLIER_CODE As String
+Public SUPPLIER_NAME_FLAG  As String
+Public PART_GROUP_NAME As String
+Public m_Import As Collection
+
+Private Sub Class_Initialize()
+   Set m_Conn = glbDatabaseMngr.DBConnection
+   TX_TYPE = "I"
+   FROM_DATE = -1
+   TO_DATE = -1
+   Set m_Import = New Collection
+End Sub
+
+'In this class we will not handle any error or any transaction
+Public Function QueryData(Ind As Long, Rs As ADODB.Recordset, ItemCount As Long)
+Dim SQL1 As String
+Dim SQL2 As String
+Dim SelectStr1 As String
+Dim SelectStr2 As String
+Dim FromStr As String
+Dim WhereStr As String
+Dim OrderByStr As String
+Dim OrderTypeStr As String
+Dim TempDate As String
+Dim SubLen As Long
+Dim NewStr As String
+Dim GroupByStr As String
+Dim MustCount As Boolean
+   
+   MustCount = True
+   SIMULATE_FLAG = glbUser.SIMULATE_FLAG
+   
+   If Ind = 1 Or Ind = 9999 Then
+      SelectStr1 = "SELECT II.*, PT.*, LC.*, PI.*, UN.*, IVD.DOCUMENT_DATE, IVD.DOCUMENT_NO, IVD.COMMIT_FLAG, IVD.DOCUMENT_TYPE "
+      SelectStr2 = "SELECT COUNT(*)  "
+      
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_TYPE PT ON (PI.PART_TYPE = PT.PART_TYPE_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN LOCATION LC ON (II.LOCATION_ID = LC.LOCATION_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN UNIT UN ON (PI.UNIT_COUNT = UN.UNIT_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      
+      WhereStr = ""
+       ElseIf Ind = 8888 Then
+      SelectStr1 = "SELECT II.*, PT.*, LC.*, PI.*, UN.*, PG.*, IVD.DOCUMENT_DATE, IVD.DOCUMENT_NO, IVD.COMMIT_FLAG, IVD.DOCUMENT_TYPE "
+      SelectStr1 = SelectStr1 & " ,SNS.LONG_NAME SUP_NAME ,SC.SUPPLIER_CODE SUP_NUM " ' SC.SUPPLIER_CODE SUP_NUM,IVD.DOCUMENT_DATE,IVD.DOCUMENT_NO,PI.PART_NO
+      SelectStr2 = "SELECT COUNT(*)  "
+      
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_TYPE PT ON (PI.PART_TYPE = PT.PART_TYPE_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_GROUP PG ON (PT.PART_GROUP_ID = PG.PART_GROUP_ID ) "
+      FromStr = FromStr & "LEFT OUTER JOIN LOCATION LC ON (II.LOCATION_ID = LC.LOCATION_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN UNIT UN ON (PI.UNIT_COUNT = UN.UNIT_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      
+      FromStr = FromStr & "LEFT OUTER JOIN SUPPLIER_NAME SN ON (PI.SUPPLIER_ID = SN.SUPPLIER_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN NAME SNS ON (SN.NAME_ID = SNS.NAME_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN SUPPLIER SC ON (PI.SUPPLIER_ID = SC.SUPPLIER_ID) "
+      
+      WhereStr = ""
+   ElseIf Ind = 2 Then
+      SelectStr1 = "SELECT PTT.PART_TYPE_NO, PTT.PART_TYPE_NAME, PI.PART_NO, PI.PART_DESC, IVD.DOCUMENT_NO, IVD.DOCUMENT_DATE, II.*, UN.UNIT_NAME "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II, INVENTORY_DOC IVD, PART_TYPE PTT, PART_ITEM PI, UNIT UN "
+      
+      WhereStr = "WHERE (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      WhereStr = WhereStr & "AND (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      WhereStr = WhereStr & "AND (PI.PART_TYPE = PTT.PART_TYPE_ID) "
+      WhereStr = WhereStr & "AND (PI.UNIT_COUNT = UN.UNIT_ID) "
+      WhereStr = WhereStr & "AND (IVD.DOCUMENT_TYPE = 1) "
+   ElseIf Ind = 3 Then
+      SelectStr1 = "SELECT PI.PART_NO, PI.PIG_TYPE, II.LOCATION_ID, SUM(II.IMPORT_AMOUNT) IMPORT_AMOUNT "
+      SelectStr2 = "SELECT COUNT(*)  "
+      
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      
+      WhereStr = "WHERE (PI.PIG_FLAG = 'Y') "
+   ElseIf Ind = 4 Then
+      SelectStr1 = "SELECT DISTINCT PI.PART_NO, PI.PIG_TYPE "
+      SelectStr2 = "SELECT COUNT(*)  "
+      
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      
+      WhereStr = "WHERE (PI.PIG_FLAG = 'Y') "
+   ElseIf Ind = 5 Then
+      SelectStr1 = "SELECT II.PART_ITEM_ID, SUM(II.TOTAL_INCLUDE_PRICE) SUM_ALL_IMPORT_AMT, SUM(II.IMPORT_AMOUNT) SUM_ALL_IMPORT "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+
+      WhereStr = "WHERE (PI.PIG_FLAG = 'N') "
+      WhereStr = WhereStr & "AND (IVD.DOCUMENT_DATE >= '" & DateToStringIntLow(FROM_DATE) & "')"
+      WhereStr = WhereStr & "AND (IVD.DOCUMENT_DATE < '" & DateToStringIntLow(TO_DATE) & "')"
+   ElseIf Ind = 6 Then
+      SelectStr1 = "SELECT II.PART_ITEM_ID, IVD.DOCUMENT_TYPE, IVD.SALE_FLAG, SUM(II.TOTAL_INCLUDE_PRICE) SUM_IMPORT_AMT, SUM(II.IMPORT_AMOUNT) SUM_IMPORT "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      
+      WhereStr = "WHERE (PI.PIG_FLAG = 'N') "
+   ElseIf (Ind = 7) Or (Ind = 10) Then
+      SelectStr1 = "SELECT UN.UNIT_NAME, II.*, PT.PART_TYPE_NO, PT.PART_TYPE_NAME, IVD.COMMIT_FLAG, IVD.DOCUMENT_TYPE, IVD.DOCUMENT_DATE, IVD.DOCUMENT_NO, PI.PART_NO, PI.PART_DESC, PR.PRIORITY1, PR.PRIORITY2, IVD.CUS_ID, "
+      SelectStr1 = SelectStr1 & "PI.PIG_FLAG, PI.PIG_TYPE, PI.PART_TYPE, II.IMPORT_AMOUNT TX_AMOUNT, II.TOTAL_INCLUDE_PRICE TX_TOTAL_PRICE, "
+      SelectStr1 = SelectStr1 & "II.TRANSACTION_SEQ "
+      SelectStr2 = "SELECT COUNT(*)  "
+      
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN DOCUMENT_PRIORITY PR ON (IVD.DOCUMENT_TYPE = PR.DOCUMENT_TYPE) AND (PR.AREA = 1)"
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_TYPE PT ON (PI.PART_TYPE = PT.PART_TYPE_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN UNIT UN ON (PI.UNIT_COUNT = UN.UNIT_ID) "
+      
+      WhereStr = ""
+   ElseIf Ind = 8 Then
+      SelectStr1 = "SELECT IVD.DOCUMENT_DATE, II.TRANSACTION_SEQ, II.LOCATION_ID, II.PART_ITEM_ID, II.CURRENT_AMOUNT, II.NEW_PRICE , 'I' "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+
+      WhereStr = "WHERE II.TRANSACTION_SEQ IN "
+      WhereStr = WhereStr & "( "
+      WhereStr = WhereStr & "   SELECT MAX(II1.TRANSACTION_SEQ) "
+      WhereStr = WhereStr & "   FROM IMPORT_ITEM II1 "
+      WhereStr = WhereStr & "   LEFT OUTER JOIN INVENTORY_DOC IVD1 ON (II1.INVENTORY_DOC_ID = IVD1.INVENTORY_DOC_ID) "
+      WhereStr = WhereStr & "   WHERE (IVD1.DOCUMENT_DATE = IVD.DOCUMENT_DATE) "
+      WhereStr = WhereStr & "   AND (II1.PART_ITEM_ID = II.PART_ITEM_ID) "
+      WhereStr = WhereStr & "   AND (II1.LOCATION_ID = II.LOCATION_ID) "
+      WhereStr = WhereStr & ") "
+      
+      MustCount = False
+   ElseIf Ind = 9 Then
+      SelectStr1 = "SELECT DISTINCT II.PART_ITEM_ID, PI.PART_NO, PI.PART_DESC, PI.PIG_TYPE, PT.PART_TYPE_NO, PT.PART_TYPE_NAME "
+      SelectStr2 = "SELECT COUNT(DISTINCT(II.PART_ITEM_ID))  "
+      
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_TYPE PT ON (PI.PART_TYPE = PT.PART_TYPE_ID) "
+      
+      WhereStr = ""
+   ElseIf Ind = 11 Then
+      SelectStr1 = "SELECT II.LOCATION_ID, IVD.DOCUMENT_TYPE, SUM(II.TOTAL_INCLUDE_PRICE) SUM_IMPORT_AMT, SUM(II.IMPORT_AMOUNT) SUM_IMPORT "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      
+      WhereStr = "WHERE (PI.PIG_FLAG = 'Y') "
+   ElseIf Ind = 12 Then
+      SelectStr1 = "SELECT DISTINCT II.LOCATION_ID "
+      SelectStr2 = "SELECT COUNT(*)  "
+      
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN LOCATION LC ON (II.LOCATION_ID = LC.LOCATION_ID) "
+      
+      WhereStr = ""
+      WhereStr = "WHERE (LC.LOCATION_TYPE = 1) "
+   ElseIf Ind = 13 Then
+      SelectStr1 = "SELECT II.PART_ITEM_ID, IVD.DOCUMENT_TYPE, SUM(II.TOTAL_INCLUDE_PRICE) SUM_IMPORT_AMT, SUM(II.IMPORT_AMOUNT) SUM_IMPORT "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      
+      WhereStr = "WHERE (PI.PIG_FLAG = 'Y') "
+   ElseIf Ind = 14 Then
+      SelectStr1 = "SELECT II.PART_ITEM_ID, II.LOCATION_ID, SUM(II.IMPORT_AMOUNT) IMPORT_AMOUNT, SUM(II.TOTAL_WEIGHT) TOTAL_WEIGHT "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      
+      WhereStr = "WHERE (PI.PIG_FLAG = 'Y') "
+      WhereStr = WhereStr & "AND (IVD.DOCUMENT_TYPE = 5) "
+   ElseIf Ind = 15 Then
+      SelectStr1 = "SELECT II.PART_ITEM_ID, SUM(II.IMPORT_AMOUNT) IMPORT_AMOUNT, SUM(II.TOTAL_INCLUDE_PRICE) TOTAL_INCLUDE_PRICE, SUM(II.TOTAL_ACTUAL_PRICE) TOTAL_ACTUAL_PRICE, SUM(TOTAL_WEIGHT) TOTAL_WEIGHT "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PRODUCT_TYPE PDT ON (PI.PIG_TYPE = PDT.PRODUCT_TYPE_NO) "
+      FromStr = FromStr & "LEFT OUTER JOIN LOCATION LC ON (II.LOCATION_ID = LC.LOCATION_ID) "
+
+      WhereStr = ""
+   ElseIf Ind = 16 Then
+      SelectStr1 = "SELECT SUM(II.IMPORT_AMOUNT) IMPORT_AMOUNT "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+
+      WhereStr = ""
+   ElseIf Ind = 17 Then
+      SelectStr1 = "SELECT II.*,  IVD.* "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+
+      WhereStr = "WHERE II.TRANSACTION_SEQ IN "
+      WhereStr = WhereStr & "( "
+      WhereStr = WhereStr & "   SELECT MAX(II1.TRANSACTION_SEQ) "
+      WhereStr = WhereStr & "   FROM IMPORT_ITEM II1, INVENTORY_DOC IVD1 "
+      WhereStr = WhereStr & "   WHERE (II1.INVENTORY_DOC_ID = IVD1.INVENTORY_DOC_ID) "
+      WhereStr = WhereStr & "   AND (II1.TRANSACTION_SEQ < " & TRANSACTION_SEQ & " ) "
+      WhereStr = WhereStr & "   AND (II1.PART_ITEM_ID = " & PART_ITEM_ID1 & ") "
+      WhereStr = WhereStr & "   AND (II1.LOCATION_ID = " & LOCATION_ID1 & ") "
+'      WhereStr = WhereStr & "   AND (IVD1.COMMIT_FLAG = 'Y') "
+      WhereStr = WhereStr & ") "
+   ElseIf Ind = 18 Then
+      SelectStr1 = "SELECT II.PART_ITEM_ID, II.LOCATION_ID, SUM(II.IMPORT_AMOUNT) IMPORT_AMOUNT, SUM(II.TOTAL_INCLUDE_PRICE) TOTAL_INCLUDE_PRICE "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PRODUCT_TYPE PDT ON (PI.PIG_TYPE = PDT.PRODUCT_TYPE_NO) "
+
+      WhereStr = ""
+   ElseIf Ind = 19 Then
+      SelectStr1 = "SELECT DISTINCT II.LOCATION_ID, II.PART_ITEM_ID, II.PIG_STATUS "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+
+      WhereStr = ""
+   ElseIf Ind = 20 Then
+      SelectStr1 = "SELECT II.LOCATION_ID, II.PART_ITEM_ID, II.PIG_STATUS, SUM(II.IMPORT_AMOUNT) IMPORT_AMOUNT "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+
+      WhereStr = ""
+   ElseIf Ind = 21 Then
+      SelectStr1 = "SELECT II.PART_ITEM_ID, II.PIG_STATUS, SUM(II.IMPORT_AMOUNT) IMPORT_AMOUNT, SUM(II.TOTAL_INCLUDE_PRICE) TOTAL_INCLUDE_PRICE "
+      SelectStr2 = "SELECT COUNT(*)  "
+    
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+
+      WhereStr = ""
+   ElseIf Ind = 22 Then
+      SelectStr1 = "SELECT II.LOCATION_ID, SUM(II.IMPORT_AMOUNT) IMPORT_AMOUNT "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PRODUCT_TYPE PDT ON (PI.PIG_TYPE = PDT.PRODUCT_TYPE_NO) "
+
+      WhereStr = ""
+   ElseIf Ind = 23 Then
+      SelectStr1 = "SELECT EI.EXPORT_ITEM_ID, EI.TRANSACTION_SEQ EXP_SEQ, II.IMPORT_ITEM_ID, II.TRANSACTION_SEQ IMP_SEQ "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM EXPORT_ITEM EI, IMPORT_ITEM II "
+
+      WhereStr = "WHERE (EI.GUI_ID = II.GUI_ID) AND (EI.TRANSACTION_SEQ > II.TRANSACTION_SEQ) "
+   ElseIf Ind = 24 Then             'LoadPigTypeImportAmount
+      SelectStr1 = "SELECT PI.PIG_TYPE, SUM(II.IMPORT_AMOUNT) IMPORT_AMOUNT, SUM(II.TOTAL_INCLUDE_PRICE) TOTAL_INCLUDE_PRICE "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+
+      WhereStr = ""
+   ElseIf Ind = 25 Then
+      SelectStr1 = "SELECT PI.PIG_TYPE, IVD.DOCUMENT_TYPE, SUM(II.IMPORT_AMOUNT) IMPORT_AMOUNT, SUM(II.TOTAL_INCLUDE_PRICE) TOTAL_INCLUDE_PRICE "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+
+      WhereStr = ""
+   ElseIf Ind = 26 Then
+      SelectStr1 = "SELECT IVD.YYYYMM2, PI.PART_TYPE, SUM(II.TOTAL_INCLUDE_PRICE) TOTAL_INCLUDE_PRICE "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+
+      WhereStr = ""
+   ElseIf Ind = 27 Then
+      SelectStr1 = "SELECT IVD.YYYYMM, PI.PART_ITEM_ID, SUM(II.TOTAL_INCLUDE_PRICE) TOTAL_INCLUDE_PRICE, SUM(II.IMPORT_AMOUNT) IMPORT_AMOUNT "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_TYPE PT ON (PI.PART_TYPE = PT.PART_TYPE_ID) "
+
+      WhereStr = ""
+   ElseIf Ind = 28 Then
+      SelectStr1 = "SELECT DISTINCT PI.PART_ITEM_ID, PI.PART_NO, PI.PART_DESC, PI.PART_TYPE, PT.PART_TYPE_NO, PT.PART_TYPE_NAME "
+      SelectStr2 = "SELECT COUNT(*)  "
+      
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_TYPE PT ON (PI.PART_TYPE = PT.PART_TYPE_ID) "
+       
+      WhereStr = ""
+   ElseIf Ind = 29 Then
+      SelectStr1 = "SELECT IVD.YYYYMM, SUM(II.TOTAL_INCLUDE_PRICE) TOTAL_INCLUDE_PRICE, SUM(II.IMPORT_AMOUNT) IMPORT_AMOUNT "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_TYPE PT ON (PI.PART_TYPE = PT.PART_TYPE_ID) "
+
+      WhereStr = ""
+   ElseIf Ind = 30 Then
+      SelectStr1 = "SELECT IVD.YYYYMM2, SUM(II.TOTAL_INCLUDE_PRICE) TOTAL_INCLUDE_PRICE, SUM(II.IMPORT_AMOUNT) IMPORT_AMOUNT, SUM(II.TOTAL_ACTUAL_PRICE) TOTAL_ACTUAL_PRICE "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_TYPE PT ON (PI.PART_TYPE = PT.PART_TYPE_ID) "
+
+      WhereStr = ""
+   ElseIf Ind = 31 Then         'LoadPartImportAmountByFeedGroup
+      SelectStr1 = "SELECT PI.FEED_GROUP, SUM(II.IMPORT_AMOUNT) IMPORT_AMOUNT, SUM(II.TOTAL_INCLUDE_PRICE) TOTAL_INCLUDE_PRICE, SUM(II.TOTAL_ACTUAL_PRICE) TOTAL_ACTUAL_PRICE, SUM(TOTAL_WEIGHT) TOTAL_WEIGHT "
+      SelectStr2 = "SELECT COUNT(*)  "
+    
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_TYPE PT ON (PI.PART_TYPE = PT.PART_TYPE_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PRODUCT_TYPE PDT ON (PI.PIG_TYPE = PDT.PRODUCT_TYPE_NO) "
+      FromStr = FromStr & "LEFT OUTER JOIN LOCATION LC ON (II.LOCATION_ID = LC.LOCATION_ID) "
+
+      WhereStr = ""
+   ElseIf Ind = 32 Then
+      SelectStr1 = "SELECT IVD.YYYYMM2, SUM(II.TOTAL_INCLUDE_PRICE) TOTAL_INCLUDE_PRICE, SUM(II.IMPORT_AMOUNT) IMPORT_AMOUNT, SUM(II.TOTAL_ACTUAL_PRICE) TOTAL_ACTUAL_PRICE "
+      SelectStr1 = SelectStr1 & ",II.INTAKE_TYPE "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_TYPE PT ON (PI.PART_TYPE = PT.PART_TYPE_ID) "
+
+      WhereStr = ""
+   End If
+   
+   If IMPORT_ITEM_ID > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (IMPORT_ITEM_ID = " & IMPORT_ITEM_ID & ") "
+      Else
+         WhereStr = WhereStr & "AND (IMPORT_ITEM_ID = " & IMPORT_ITEM_ID & ") "
+      End If
+   End If
+   
+   If INVENTORY_DOC_ID > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (II.INVENTORY_DOC_ID = " & INVENTORY_DOC_ID & ") "
+      Else
+         WhereStr = WhereStr & "AND (II.INVENTORY_DOC_ID = " & INVENTORY_DOC_ID & ") "
+      End If
+   End If
+   
+   If LOCATION_ID > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (II.LOCATION_ID = " & LOCATION_ID & ") "
+      Else
+         WhereStr = WhereStr & "AND (II.LOCATION_ID = " & LOCATION_ID & ") "
+      End If
+   End If
+   
+   If PART_ITEM_ID > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (II.PART_ITEM_ID = " & PART_ITEM_ID & ") "
+      Else
+         WhereStr = WhereStr & "AND (II.PART_ITEM_ID = " & PART_ITEM_ID & ") "
+      End If
+   End If
+   
+   If Len(COMMIT_FLAG) > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (COMMIT_FLAG = '" & COMMIT_FLAG & "') "
+      Else
+         WhereStr = WhereStr & "AND (COMMIT_FLAG = '" & COMMIT_FLAG & "') "
+      End If
+   End If
+   
+   If Len(PIG_FLAG) > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (PIG_FLAG = '" & PIG_FLAG & "') "
+      Else
+         WhereStr = WhereStr & "AND (PIG_FLAG = '" & PIG_FLAG & "') "
+      End If
+   End If
+   
+   If Len(PIG_TYPE) > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (PIG_TYPE = '" & PIG_TYPE & "') "
+      Else
+         WhereStr = WhereStr & "AND (PIG_TYPE = '" & PIG_TYPE & "') "
+      End If
+   End If
+   
+   If SIMULATE_FLAG = "Y" Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (SIMULATE_FLAG = '" & SIMULATE_FLAG & "') "
+      Else
+         WhereStr = WhereStr & "AND (SIMULATE_FLAG = '" & SIMULATE_FLAG & "') "
+      End If
+   Else
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE ((SIMULATE_FLAG <> 'Y') OR (SIMULATE_FLAG IS NULL)) "
+      Else
+         WhereStr = WhereStr & "AND ((SIMULATE_FLAG <> 'Y') OR (SIMULATE_FLAG IS NULL)) "
+      End If
+   End If
+   
+   If Len(INTAKE_FLAG) > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (PI.INTAKE_FLAG = '" & INTAKE_FLAG & "') "
+      Else
+         WhereStr = WhereStr & "AND (PI.INTAKE_FLAG = '" & INTAKE_FLAG & "') "
+      End If
+   End If
+   
+   If DOCUMENT_TYPE > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (DOCUMENT_TYPE = " & DOCUMENT_TYPE & ") "
+      Else
+         WhereStr = WhereStr & "AND (DOCUMENT_TYPE = " & DOCUMENT_TYPE & ") "
+      End If
+   End If
+   
+   If PIG_STATUS > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (PIG_STATUS = " & PIG_STATUS & ") "
+      Else
+         WhereStr = WhereStr & "AND (PIG_STATUS = " & PIG_STATUS & ") "
+      End If
+   End If
+   
+'   If Ind = 2 Then
+
+      If PART_TYPE > 0 Then
+         If Len(WhereStr) <= 0 Then
+            WhereStr = "WHERE (PART_TYPE = " & PART_TYPE & ") "
+         Else
+            WhereStr = WhereStr & "AND (PART_TYPE = " & PART_TYPE & ") "
+         End If
+      End If
+      
+      If PART_GROUP > 0 Then
+         If Len(WhereStr) <= 0 Then
+            WhereStr = "WHERE (PT.PART_GROUP_ID = " & PART_GROUP & ") "
+         Else
+            WhereStr = WhereStr & "AND (PT.PART_GROUP_ID = " & PART_GROUP & ") "
+         End If
+      End If
+      
+       If FROM_DATE > -1 Then
+         TempDate = DateToStringIntLow(Trim(FROM_DATE))
+         If WhereStr = "" Then
+            WhereStr = "WHERE (DOCUMENT_DATE >= '" & ChangeQuote(TempDate) & "')"
+         Else
+            WhereStr = WhereStr & "AND (DOCUMENT_DATE >= '" & ChangeQuote(TempDate) & "')"
+         End If
+      End If
+   
+      If TO_DATE > -1 Then
+         TempDate = DateToStringIntHi(Trim(TO_DATE))
+         If WhereStr = "" Then
+            WhereStr = "WHERE (DOCUMENT_DATE <= '" & ChangeQuote(TempDate) & "')"
+         Else
+            WhereStr = WhereStr & "AND (DOCUMENT_DATE <= '" & ChangeQuote(TempDate) & "')"
+         End If
+      End If
+'   End If
+   
+   If Trim(PART_NO) <> "" Then
+      If WildCard(PART_NO, SubLen, NewStr) Then
+         If WhereStr = "" Then
+            WhereStr = "WHERE (SUBSTR(PART_NO,1," & SubLen & ") = '" & ChangeQuote(Trim(NewStr)) & "')"
+         Else
+            WhereStr = WhereStr & "AND (SUBSTR(PART_NO,1," & SubLen & ") = '" & ChangeQuote(Trim(NewStr)) & "')"
+         End If
+      Else
+         If WhereStr = "" Then
+            WhereStr = "WHERE (PART_NO = '" & ChangeQuote(Trim(PART_NO)) & "')"
+         Else
+            WhereStr = WhereStr & "AND (PART_NO = '" & ChangeQuote(Trim(PART_NO)) & "')"
+         End If
+      End If
+   End If
+   
+   
+   'SUPPLIER_CODE
+      If Trim(SUPPLIER_CODE) <> "" Then
+      If WildCard(SUPPLIER_CODE, SubLen, NewStr) Then
+         If WhereStr = "" Then
+            WhereStr = "WHERE (SUBSTR(SUPPLIER_CODE,1," & SubLen & ") = '" & ChangeQuote(Trim(NewStr)) & "')"
+         Else
+            WhereStr = WhereStr & "AND (SUBSTR(SUPPLIER_CODE,1," & SubLen & ") = '" & ChangeQuote(Trim(NewStr)) & "')"
+         End If
+      Else
+         If WhereStr = "" Then
+            WhereStr = "WHERE (SUPPLIER_CODE = '" & ChangeQuote(Trim(SUPPLIER_CODE)) & "')"
+         Else
+            WhereStr = WhereStr & "AND (SUPPLIER_CODE= '" & ChangeQuote(Trim(SUPPLIER_CODE)) & "')"
+         End If
+      End If
+   End If
+   If GUI_ID > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (GUI_ID = " & GUI_ID & ") "
+      Else
+         WhereStr = WhereStr & "AND (GUI_ID = " & GUI_ID & ") "
+      End If
+   End If
+   
+   If FROM_GUI_ID > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (GUI_ID >= " & FROM_GUI_ID & ") "
+      Else
+         WhereStr = WhereStr & "AND (GUI_ID >= " & FROM_GUI_ID & ") "
+      End If
+   End If
+   
+   If TO_GUI_ID > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (GUI_ID <= " & TO_GUI_ID & ") "
+      Else
+         WhereStr = WhereStr & "AND (GUI_ID <= " & TO_GUI_ID & ") "
+      End If
+   End If
+   
+   If FROM_TX_SEQ > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (TRANSACTION_SEQ > " & FROM_TX_SEQ & ") "
+      Else
+         WhereStr = WhereStr & "AND (TRANSACTION_SEQ > " & FROM_TX_SEQ & ") "
+      End If
+   End If
+   
+   If TO_TX_SEQ > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (TRANSACTION_SEQ < " & TO_TX_SEQ & ") "
+      Else
+         WhereStr = WhereStr & "AND (TRANSACTION_SEQ < " & TO_TX_SEQ & ") "
+      End If
+   End If
+   
+   If Len(PARENT_FLAG) > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (CAPITAL_FLAG = '" & PARENT_FLAG & "') "
+      Else
+         WhereStr = WhereStr & "AND (CAPITAL_FLAG = '" & PARENT_FLAG & "') "
+      End If
+   End If
+   
+   If Ind = 15 Then
+      If Len(HOUSE_SALE_FLAG) > 0 Then
+         If Len(WhereStr) <= 0 Then
+            WhereStr = "WHERE (HS.SALE_FLAG = '" & HOUSE_SALE_FLAG & "') "
+         Else
+            WhereStr = WhereStr & "AND (HS.SALE_FLAG = '" & HOUSE_SALE_FLAG & "') "
+         End If
+      End If
+      
+      If HOUSE_GROUP_ID > 0 Then
+         If Len(WhereStr) <= 0 Then
+            WhereStr = "WHERE (II.LOCATION_ID IN (SELECT LOCATION_ID FROM HGROUP_ITEM WHERE (HOUSE_GROUP_ID = " & HOUSE_GROUP_ID & ") AND (SELECT_FLAG = 'Y')))"
+         Else
+            WhereStr = WhereStr & "AND (II.LOCATION_ID IN (SELECT LOCATION_ID FROM HGROUP_ITEM WHERE (HOUSE_GROUP_ID = " & HOUSE_GROUP_ID & ") AND (SELECT_FLAG = 'Y')))"
+         End If
+      End If
+   End If
+   
+   If Len(REPLACE_FLAG) > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (REPLACE_FLAG = '" & REPLACE_FLAG & "') "
+      Else
+         WhereStr = WhereStr & "AND (REPLACE_FLAG = '" & REPLACE_FLAG & "') "
+      End If
+   End If
+   
+'   SUPPLIER_CODE
+   
+   
+   If BATCH_ID > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (BATCH_ID = " & BATCH_ID & ") "
+      Else
+         WhereStr = WhereStr & "AND (BATCH_ID = " & BATCH_ID & ") "
+      End If
+   Else
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE ((BATCH_ID <= 0) OR (BATCH_ID IS NULL)) "
+      Else
+         WhereStr = WhereStr & "AND ((BATCH_ID <= 0) OR (BATCH_ID IS NULL)) "
+      End If
+   End If
+   
+   If Trim(DOCUMENT_NO) <> "" Then
+      If WildCard(DOCUMENT_NO, SubLen, NewStr) Then
+         If WhereStr = "" Then
+            WhereStr = "WHERE (SUBSTR(IVD.DOCUMENT_NO,1," & SubLen & ") = '" & ChangeQuote(Trim(NewStr)) & "')"
+         Else
+            WhereStr = WhereStr & "AND (SUBSTR(IVD.DOCUMENT_NO,1," & SubLen & ") = '" & ChangeQuote(Trim(NewStr)) & "')"
+         End If
+      Else
+         If WhereStr = "" Then
+            WhereStr = "WHERE (IVD.DOCUMENT_NO = '" & ChangeQuote(Trim(DOCUMENT_NO)) & "')"
+         Else
+            WhereStr = WhereStr & "AND (IVD.DOCUMENT_NO = '" & ChangeQuote(Trim(DOCUMENT_NO)) & "')"
+         End If
+      End If
+   End If
+   
+   GroupByStr = ""
+   If Ind = 3 Then
+      GroupByStr = "GROUP BY PI.PART_NO, II.LOCATION_ID, PI.PIG_TYPE "
+   ElseIf Ind = 5 Then
+      GroupByStr = "GROUP BY II.PART_ITEM_ID "
+   ElseIf Ind = 6 Then
+      GroupByStr = "GROUP BY II.PART_ITEM_ID, IVD.DOCUMENT_TYPE, IVD.SALE_FLAG "
+   ElseIf Ind = 11 Then
+      GroupByStr = "GROUP BY II.LOCATION_ID, IVD.DOCUMENT_TYPE "
+   ElseIf Ind = 13 Then
+      GroupByStr = "GROUP BY II.PART_ITEM_ID, IVD.DOCUMENT_TYPE "
+   ElseIf Ind = 14 Then
+      GroupByStr = "GROUP BY II.PART_ITEM_ID,  II.LOCATION_ID "
+   ElseIf Ind = 15 Then
+      GroupByStr = "GROUP BY II.PART_ITEM_ID "
+   ElseIf Ind = 18 Then
+      GroupByStr = "GROUP BY II.PART_ITEM_ID,  II.LOCATION_ID "
+   ElseIf Ind = 20 Then
+      GroupByStr = "GROUP BY II.LOCATION_ID, II.PART_ITEM_ID, II.PIG_STATUS "
+   ElseIf Ind = 21 Then
+      GroupByStr = "GROUP BY II.PART_ITEM_ID,  II.PIG_STATUS "
+   ElseIf Ind = 22 Then
+      GroupByStr = "GROUP BY II.LOCATION_ID "
+   ElseIf Ind = 24 Then
+      GroupByStr = "GROUP BY PI.PIG_TYPE "
+   ElseIf Ind = 25 Then
+      GroupByStr = "GROUP BY PI.PIG_TYPE, IVD.DOCUMENT_TYPE "
+   ElseIf Ind = 26 Then
+      GroupByStr = "GROUP BY IVD.YYYYMM2, PI.PART_TYPE "
+   ElseIf Ind = 27 Then
+      GroupByStr = "GROUP BY IVD.YYYYMM, PI.PART_ITEM_ID "
+   ElseIf Ind = 29 Then
+      GroupByStr = "GROUP BY IVD.YYYYMM "
+   ElseIf Ind = 30 Then
+      GroupByStr = "GROUP BY IVD.YYYYMM2 "
+   ElseIf Ind = 31 Then
+      GroupByStr = "GROUP BY PI.FEED_GROUP "
+   ElseIf Ind = 32 Then
+      GroupByStr = "GROUP BY IVD.YYYYMM2,II.INTAKE_TYPE "
+   End If
+   
+   OrderByStr = ""
+   OrderTypeStr = ""
+
+   If Ind = 1 Then
+      If OrderBy = 1 Then
+         OrderByStr = "ORDER BY IMPORT_ITEM_ID "
+      ElseIf OrderBy = 2 Then
+         OrderByStr = "ORDER BY IMPORT_ITEM_ID "
+      ElseIf OrderBy = 3 Then
+         OrderByStr = "ORDER BY DOCUMENT_DATE DESC, TRANSACTION_SEQ "
+      ElseIf OrderBy = 4 Then
+         OrderByStr = "ORDER BY LOCATION_ID DESC, DOCUMENT_DATE DESC, TRANSACTION_SEQ "
+      ElseIf OrderBy = 5 Then
+         OrderByStr = "ORDER BY PT.PART_TYPE_NO "
+      ElseIf OrderBy = 6 Then
+         OrderByStr = "ORDER BY II.PART_ITEM_ID "
+      ElseIf OrderBy = 7 Then
+         OrderByStr = "ORDER BY IVD.DOCUMENT_DATE "
+      ElseIf OrderBy = 8 Then
+         OrderByStr = "ORDER BY IVD.DOCUMENT_NO "
+      ElseIf OrderBy = 9 Then
+         OrderByStr = "ORDER BY LC.LOCATION_NO "
+      ElseIf OrderBy = 10 Then
+         If OrderType = 1 Then
+            OrderByStr = "ORDER BY IVD.DOCUMENT_DATE ASC, II.TRANSACTION_SEQ  "
+         Else
+            OrderByStr = "ORDER BY IVD.DOCUMENT_DATE ASC, II.TRANSACTION_SEQ  "
+         End If
+      ElseIf OrderBy = 11 Then
+         OrderByStr = "ORDER BY DOCUMENT_DATE, DOCUMENT_NO  "
+      ElseIf OrderBy = 12 Then
+         OrderByStr = "ORDER BY TRANSACTION_SEQ "
+      Else
+         OrderByStr = "ORDER BY IMPORT_ITEM_ID "
+      End If
+      
+     ElseIf Ind = 8888 Then
+     ' SC.SUPPLIER_CODE SUP_NUM,IVD.DOCUMENT_DATE,IVD.DOCUMENT_NO,PI.PART_NO
+     If OrderBy = 1 Then
+     OrderByStr = "ORDER BY  SC.SUPPLIER_CODE ,IVD.DOCUMENT_DATE,IVD.DOCUMENT_NO,PI.PART_NO  "
+      ElseIf OrderBy = 2 Then
+        OrderByStr = "ORDER BY  IVD.DOCUMENT_DATE,IVD.DOCUMENT_NO,PI.PART_NO  "
+
+      
+      End If
+      
+      
+   ElseIf Ind = 2 Then
+      If OrderBy = 1 Then
+         OrderByStr = "ORDER BY PART_TYPE_NO "
+      ElseIf OrderBy = 2 Then
+         OrderByStr = "ORDER BY PART_NO "
+      ElseIf OrderBy = 3 Then
+         OrderByStr = "ORDER BY DOCUMENT_NO "
+      ElseIf OrderBy = 4 Then
+         OrderByStr = "ORDER BY DOCUMENT_DATE "
+      Else
+         OrderByStr = "ORDER BY IMPORT_ITEM_ID "
+      End If
+   ElseIf Ind = 3 Then
+      OrderByStr = "ORDER BY PI.PART_NO "
+   ElseIf Ind = 4 Then
+      OrderByStr = "ORDER BY PI.PART_NO, PI.PIG_TYPE "
+   ElseIf Ind = 5 Then
+      OrderByStr = "ORDER BY PI.PART_TYPE "
+   ElseIf Ind = 7 Then
+      If OrderType = 1 Then
+         If OrderBy = 1 Then
+            OrderByStr = "ORDER BY PT.PART_TYPE_NO ASC, PI.PART_NO ASC, IVD.DOCUMENT_DATE ASC, PR.PRIORITY1 ASC, IVD.DOCUMENT_NO "
+         ElseIf OrderBy = 2 Then
+            OrderByStr = "ORDER BY IVD.DOCUMENT_DATE ASC, PR.PRIORITY1 ASC, IVD.DOCUMENT_NO ASC, II.TRANSACTION_SEQ "
+         End If
+      Else
+         If OrderBy = 1 Then
+            OrderByStr = "ORDER BY PT.PART_TYPE_NO DESC, PI.PART_NO ASC, IVD.DOCUMENT_DATE ASC, PR.PRIORITY1 ASC, IVD.DOCUMENT_NO "
+         ElseIf OrderBy = 2 Then
+            OrderByStr = "ORDER BY IVD.DOCUMENT_DATE ASC, PR.PRIORITY1 DESC, IVD.DOCUMENT_NO ASC, II.TRANSACTION_SEQ  "
+         End If
+      End If
+        
+'      If OrderType = 1 Then
+'         OrderByStr = "ORDER BY PT.PART_TYPE_NO ASC, PI.PART_NO ASC, IVD.DOCUMENT_DATE ASC, II.TRANSACTION_SEQ ASC "
+'      Else
+'         OrderByStr = "ORDER BY PT.PART_TYPE_NO DESC, PI.PART_NO ASC, IVD.DOCUMENT_DATE ASC, II.TRANSACTION_SEQ ASC "
+'      End If
+   
+   ElseIf Ind = 9 Then
+      If OrderBy = 1 Then
+         OrderByStr = "ORDER BY PART_TYPE_NO "
+      ElseIf OrderBy = 2 Then
+         OrderByStr = "ORDER BY PART_TYPE_NO "
+      ElseIf OrderBy = 3 Then
+         OrderByStr = "ORDER BY PART_NO "
+      ElseIf OrderBy = 4 Then
+         OrderByStr = "ORDER BY PART_TYPE_NO ASC, PI.PART_NO "
+      Else
+         OrderByStr = "ORDER BY PART_TYPE_NO "
+      End If
+   ElseIf Ind = 10 Then
+      If OrderType = 1 Then
+         OrderByStr = "ORDER BY PT.PART_TYPE_NO ASC, PI.PART_NO ASC, IVD.DOCUMENT_DATE ASC, IVD.DOCUMENT_NO "
+      Else
+         OrderByStr = "ORDER BY PT.PART_TYPE_NO DESC, PI.PART_NO ASC, IVD.DOCUMENT_DATE ASC, IVD.DOCUMENT_NO "
+      End If
+   ElseIf Ind = 26 Then
+      OrderByStr = "ORDER BY IVD.YYYYMM2 "
+   ElseIf Ind = 27 Then
+      OrderByStr = "ORDER BY IVD.YYYYMM "
+   ElseIf Ind = 28 Then
+      OrderByStr = "ORDER BY PT.PART_TYPE_NO ASC, PI.PART_NO "
+   ElseIf Ind = 29 Then
+      OrderByStr = "ORDER BY IVD.YYYYMM "
+   ElseIf Ind = 30 Then
+      OrderByStr = "ORDER BY IVD.YYYYMM2 "
+   ElseIf Ind = 31 Then
+      OrderByStr = "ORDER BY PI.FEED_GROUP "
+   ElseIf Ind = 32 Then
+      OrderByStr = "ORDER BY IVD.YYYYMM2,INTAKE_TYPE "
+   End If
+   
+   If OrderByStr <> "" Then
+      If OrderType = 1 Then
+         OrderTypeStr = "ASC "
+      ElseIf OrderType = 2 Then
+         OrderTypeStr = "DESC "
+      Else
+         OrderTypeStr = "ASC "
+      End If
+   End If
+   
+   SQL1 = SelectStr1 & FromStr & WhereStr & GroupByStr & OrderByStr & OrderTypeStr
+   SQL2 = SelectStr2 & FromStr & WhereStr
+   
+   Call glbDatabaseMngr.GetRs(SQL1, SQL2, MustCount, ItemCount, Rs, glbErrorLog)
+End Function
+
+Public Function QueryDataPatch(Ind As Long, Rs As ADODB.Recordset, ItemCount As Long)
+Dim SQL1 As String
+Dim SQL2 As String
+Dim SelectStr1 As String
+Dim SelectStr2 As String
+Dim FromStr As String
+Dim WhereStr As String
+Dim OrderByStr As String
+Dim OrderTypeStr As String
+Dim TempDate As String
+Dim SubLen As Long
+Dim NewStr As String
+Dim GroupByStr As String
+
+   If Ind = 1 Then
+      SelectStr1 = "SELECT II.*, PT.*, LC.*, PI.*, UN.*, IVD.DOCUMENT_DATE, IVD.DOCUMENT_NO, IVD.COMMIT_FLAG, IVD.DOCUMENT_TYPE "
+      SelectStr2 = "SELECT COUNT(*)  "
+      
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_TYPE PT ON (PI.PART_TYPE = PT.PART_TYPE_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN LOCATION LC ON (II.LOCATION_ID = LC.LOCATION_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN UNIT UN ON (PI.UNIT_COUNT = UN.UNIT_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      
+      WhereStr = ""
+   ElseIf Ind = 2 Then
+      SelectStr1 = "SELECT PTT.PART_TYPE_NO, PTT.PART_TYPE_NAME, PI.PART_NO, PI.PART_DESC, IVD.DOCUMENT_NO, IVD.DOCUMENT_DATE, II.*, UN.UNIT_NAME "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II, INVENTORY_DOC IVD, PART_TYPE PTT, PART_ITEM PI, UNIT UN "
+      
+      WhereStr = "WHERE (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      WhereStr = WhereStr & "AND (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      WhereStr = WhereStr & "AND (PI.PART_TYPE = PTT.PART_TYPE_ID) "
+      WhereStr = WhereStr & "AND (PI.UNIT_COUNT = UN.UNIT_ID) "
+      WhereStr = WhereStr & "AND (IVD.DOCUMENT_TYPE = 1) "
+   ElseIf Ind = 3 Then
+      SelectStr1 = "SELECT PI.PART_NO, PI.PIG_TYPE, II.LOCATION_ID, SUM(II.IMPORT_AMOUNT) IMPORT_AMOUNT "
+      SelectStr2 = "SELECT COUNT(*)  "
+      
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      
+      WhereStr = "WHERE (PI.PIG_FLAG = 'Y') "
+   ElseIf Ind = 4 Then
+      SelectStr1 = "SELECT DISTINCT PI.PART_NO, PI.PIG_TYPE "
+      SelectStr2 = "SELECT COUNT(*)  "
+      
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      
+      WhereStr = "WHERE (PI.PIG_FLAG = 'Y') "
+   ElseIf Ind = 5 Then
+      SelectStr1 = "SELECT II.PART_ITEM_ID, SUM(II.TOTAL_INCLUDE_PRICE) SUM_ALL_IMPORT_AMT, SUM(II.IMPORT_AMOUNT) SUM_ALL_IMPORT "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+
+      WhereStr = "WHERE (PI.PIG_FLAG = 'N') "
+      WhereStr = WhereStr & "AND (IVD.DOCUMENT_DATE >= '" & DateToStringIntLow(FROM_DATE) & "')"
+      WhereStr = WhereStr & "AND (IVD.DOCUMENT_DATE < '" & DateToStringIntLow(TO_DATE) & "')"
+   ElseIf Ind = 6 Then
+      SelectStr1 = "SELECT II.PART_ITEM_ID, IVD.DOCUMENT_TYPE, IVD.SALE_FLAG, SUM(II.TOTAL_INCLUDE_PRICE) SUM_IMPORT_AMT, SUM(II.IMPORT_AMOUNT) SUM_IMPORT "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      
+      WhereStr = "WHERE (PI.PIG_FLAG = 'N') "
+   ElseIf (Ind = 7) Or (Ind = 10) Then
+      SelectStr1 = "SELECT UN.UNIT_NAME, II.*, PT.PART_TYPE_NO, PT.PART_TYPE_NAME, IVD.COMMIT_FLAG, IVD.DOCUMENT_TYPE, IVD.DOCUMENT_DATE, IVD.DOCUMENT_NO, PI.PART_NO, PI.PART_DESC, PR.PRIORITY1, PR.PRIORITY2,"
+      SelectStr1 = SelectStr1 & "PI.PIG_FLAG, PI.PIG_TYPE, PI.PART_TYPE, II.IMPORT_AMOUNT TX_AMOUNT, II.TOTAL_INCLUDE_PRICE TX_TOTAL_PRICE, "
+      SelectStr1 = SelectStr1 & "II.TRANSACTION_SEQ "
+      SelectStr2 = "SELECT COUNT(*)  "
+      
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN DOCUMENT_PRIORITY PR ON (IVD.DOCUMENT_TYPE = PR.DOCUMENT_TYPE) AND (PR.AREA = 1)"
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_TYPE PT ON (PI.PART_TYPE = PT.PART_TYPE_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN UNIT UN ON (PI.UNIT_COUNT = UN.UNIT_ID) "
+      
+      WhereStr = ""
+   ElseIf Ind = 8 Then
+      SelectStr1 = "SELECT IVD.DOCUMENT_DATE, II.TRANSACTION_SEQ, II.LOCATION_ID, II.PART_ITEM_ID, II.CURRENT_AMOUNT, II.NEW_PRICE , 'I' "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+
+      WhereStr = "WHERE II.TRANSACTION_SEQ IN "
+      WhereStr = WhereStr & "( "
+      WhereStr = WhereStr & "   SELECT MAX(II1.TRANSACTION_SEQ) "
+      WhereStr = WhereStr & "   FROM IMPORT_ITEM II1 "
+      WhereStr = WhereStr & "   LEFT OUTER JOIN INVENTORY_DOC IVD1 ON (II1.INVENTORY_DOC_ID = IVD1.INVENTORY_DOC_ID) "
+      WhereStr = WhereStr & "   WHERE (IVD1.DOCUMENT_DATE = IVD.DOCUMENT_DATE) "
+      WhereStr = WhereStr & "   AND (II1.PART_ITEM_ID = II.PART_ITEM_ID) "
+      WhereStr = WhereStr & "   AND (II1.LOCATION_ID = II.LOCATION_ID) "
+      WhereStr = WhereStr & ") "
+   ElseIf Ind = 9 Then
+      SelectStr1 = "SELECT DISTINCT II.PART_ITEM_ID "
+      SelectStr2 = "SELECT COUNT(DISTINCT(II.PART_ITEM_ID))  "
+      
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      
+      WhereStr = ""
+   ElseIf Ind = 11 Then
+      SelectStr1 = "SELECT II.LOCATION_ID, IVD.DOCUMENT_TYPE, SUM(II.TOTAL_INCLUDE_PRICE) SUM_IMPORT_AMT, SUM(II.IMPORT_AMOUNT) SUM_IMPORT "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      
+      WhereStr = "WHERE (PI.PIG_FLAG = 'Y') "
+   ElseIf Ind = 12 Then
+      SelectStr1 = "SELECT DISTINCT II.LOCATION_ID "
+      SelectStr2 = "SELECT COUNT(*)  "
+      
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN LOCATION LC ON (II.LOCATION_ID = LC.LOCATION_ID) "
+      
+      WhereStr = ""
+      WhereStr = "WHERE (LC.LOCATION_TYPE = 1) "
+   ElseIf Ind = 13 Then
+      SelectStr1 = "SELECT II.PART_ITEM_ID, IVD.DOCUMENT_TYPE, SUM(II.TOTAL_INCLUDE_PRICE) SUM_IMPORT_AMT, SUM(II.IMPORT_AMOUNT) SUM_IMPORT "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      
+      WhereStr = "WHERE (PI.PIG_FLAG = 'Y') "
+   ElseIf Ind = 14 Then
+      SelectStr1 = "SELECT II.PART_ITEM_ID, II.LOCATION_ID, SUM(II.IMPORT_AMOUNT) IMPORT_AMOUNT, SUM(II.TOTAL_WEIGHT) TOTAL_WEIGHT "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      
+      WhereStr = "WHERE (PI.PIG_FLAG = 'Y') "
+      WhereStr = WhereStr & "AND (IVD.DOCUMENT_TYPE = 5) "
+   ElseIf Ind = 15 Then
+      SelectStr1 = "SELECT II.PART_ITEM_ID, SUM(II.IMPORT_AMOUNT) IMPORT_AMOUNT, SUM(II.TOTAL_INCLUDE_PRICE) TOTAL_INCLUDE_PRICE, SUM(II.TOTAL_ACTUAL_PRICE) TOTAL_ACTUAL_PRICE, SUM(TOTAL_WEIGHT) TOTAL_WEIGHT "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PRODUCT_TYPE PDT ON (PI.PIG_TYPE = PDT.PRODUCT_TYPE_NO) "
+      FromStr = FromStr & "LEFT OUTER JOIN LOCATION LC ON (II.LOCATION_ID = LC.LOCATION_ID) "
+
+      WhereStr = ""
+   ElseIf Ind = 16 Then
+      SelectStr1 = "SELECT SUM(II.IMPORT_AMOUNT) IMPORT_AMOUNT "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+
+      WhereStr = ""
+   ElseIf Ind = 17 Then
+      SelectStr1 = "SELECT II.*,  IVD.* "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+
+      WhereStr = "WHERE II.TRANSACTION_SEQ IN "
+      WhereStr = WhereStr & "( "
+      WhereStr = WhereStr & "   SELECT MAX(II1.TRANSACTION_SEQ) "
+      WhereStr = WhereStr & "   FROM IMPORT_ITEM II1, INVENTORY_DOC IVD1 "
+      WhereStr = WhereStr & "   WHERE (II1.INVENTORY_DOC_ID = IVD1.INVENTORY_DOC_ID) "
+      WhereStr = WhereStr & "   AND (II1.TRANSACTION_SEQ < " & TRANSACTION_SEQ & " ) "
+      WhereStr = WhereStr & "   AND (II1.PART_ITEM_ID = " & PART_ITEM_ID1 & ") "
+      WhereStr = WhereStr & "   AND (II1.LOCATION_ID = " & LOCATION_ID1 & ") "
+'      WhereStr = WhereStr & "   AND (IVD1.COMMIT_FLAG = 'Y') "
+      WhereStr = WhereStr & ") "
+   ElseIf Ind = 18 Then
+      SelectStr1 = "SELECT II.PART_ITEM_ID, II.LOCATION_ID, SUM(II.IMPORT_AMOUNT) IMPORT_AMOUNT, SUM(II.TOTAL_INCLUDE_PRICE) TOTAL_INCLUDE_PRICE "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PRODUCT_TYPE PDT ON (PI.PIG_TYPE = PDT.PRODUCT_TYPE_NO) "
+
+      WhereStr = ""
+   ElseIf Ind = 19 Then
+      SelectStr1 = "SELECT DISTINCT II.LOCATION_ID, II.PART_ITEM_ID, II.PIG_STATUS "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+
+      WhereStr = ""
+   ElseIf Ind = 20 Then
+      SelectStr1 = "SELECT II.LOCATION_ID, II.PART_ITEM_ID, II.PIG_STATUS, SUM(II.IMPORT_AMOUNT) IMPORT_AMOUNT "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+
+      WhereStr = ""
+   ElseIf Ind = 21 Then
+      SelectStr1 = "SELECT II.PART_ITEM_ID, II.PIG_STATUS, SUM(II.IMPORT_AMOUNT) IMPORT_AMOUNT, SUM(II.TOTAL_INCLUDE_PRICE) TOTAL_INCLUDE_PRICE "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+
+      WhereStr = ""
+   ElseIf Ind = 22 Then
+      SelectStr1 = "SELECT II.LOCATION_ID, SUM(II.IMPORT_AMOUNT) IMPORT_AMOUNT "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+
+      WhereStr = ""
+   ElseIf Ind = 23 Then
+      SelectStr1 = "SELECT EI.EXPORT_ITEM_ID, EI.TRANSACTION_SEQ EXP_SEQ, II.IMPORT_ITEM_ID, II.TRANSACTION_SEQ IMP_SEQ "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM EXPORT_ITEM EI, IMPORT_ITEM II "
+
+      WhereStr = "WHERE (EI.GUI_ID = II.GUI_ID) AND (EI.TRANSACTION_SEQ > II.TRANSACTION_SEQ) "
+   ElseIf Ind = 24 Then
+      SelectStr1 = "SELECT PI.PIG_TYPE, SUM(II.IMPORT_AMOUNT) IMPORT_AMOUNT, SUM(II.TOTAL_INCLUDE_PRICE) TOTAL_INCLUDE_PRICE "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+
+      WhereStr = ""
+   ElseIf Ind = 25 Then
+      SelectStr1 = "SELECT PI.PIG_TYPE, IVD.DOCUMENT_TYPE, SUM(II.IMPORT_AMOUNT) IMPORT_AMOUNT, SUM(II.TOTAL_INCLUDE_PRICE) TOTAL_INCLUDE_PRICE "
+      SelectStr2 = "SELECT COUNT(*)  "
+
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (II.PART_ITEM_ID = PI.PART_ITEM_ID) "
+
+      WhereStr = ""
+   End If
+   
+   If IMPORT_ITEM_ID > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (IMPORT_ITEM_ID = " & IMPORT_ITEM_ID & ") "
+      Else
+         WhereStr = WhereStr & "AND (IMPORT_ITEM_ID = " & IMPORT_ITEM_ID & ") "
+      End If
+   End If
+   
+   If INVENTORY_DOC_ID > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (INVENTORY_DOC_ID = " & INVENTORY_DOC_ID & ") "
+      Else
+         WhereStr = WhereStr & "AND (INVENTORY_DOC_ID = " & INVENTORY_DOC_ID & ") "
+      End If
+   End If
+   
+   If LOCATION_ID > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (LOCATION_ID = " & LOCATION_ID & ") "
+      Else
+         WhereStr = WhereStr & "AND (LOCATION_ID = " & LOCATION_ID & ") "
+      End If
+   End If
+   
+   If PART_ITEM_ID > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (PART_ITEM_ID = " & PART_ITEM_ID & ") "
+      Else
+         WhereStr = WhereStr & "AND (PART_ITEM_ID = " & PART_ITEM_ID & ") "
+      End If
+   End If
+   
+   If Len(COMMIT_FLAG) > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (COMMIT_FLAG = '" & COMMIT_FLAG & "') "
+      Else
+         WhereStr = WhereStr & "AND (COMMIT_FLAG = '" & COMMIT_FLAG & "') "
+      End If
+   End If
+   
+   If Len(PIG_FLAG) > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (PIG_FLAG = '" & PIG_FLAG & "') "
+      Else
+         WhereStr = WhereStr & "AND (PIG_FLAG = '" & PIG_FLAG & "') "
+      End If
+   End If
+   
+   If Len(PIG_TYPE) > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (PIG_TYPE = '" & PIG_TYPE & "') "
+      Else
+         WhereStr = WhereStr & "AND (PIG_TYPE = '" & PIG_TYPE & "') "
+      End If
+   End If
+   
+   If Len(INTAKE_FLAG) > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (INTAKE_FLAG = '" & INTAKE_FLAG & "') "
+      Else
+         WhereStr = WhereStr & "AND (INTAKE_FLAG = '" & INTAKE_FLAG & "') "
+      End If
+   End If
+   
+   If DOCUMENT_TYPE > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (DOCUMENT_TYPE = " & DOCUMENT_TYPE & ") "
+      Else
+         WhereStr = WhereStr & "AND (DOCUMENT_TYPE = " & DOCUMENT_TYPE & ") "
+      End If
+   End If
+   
+   If PIG_STATUS > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (PIG_STATUS = " & PIG_STATUS & ") "
+      Else
+         WhereStr = WhereStr & "AND (PIG_STATUS = " & PIG_STATUS & ") "
+      End If
+   End If
+   
+'   If Ind = 2 Then
+      If PART_TYPE > 0 Then
+         If Len(WhereStr) <= 0 Then
+            WhereStr = "WHERE (PART_TYPE = " & PART_TYPE & ") "
+         Else
+            WhereStr = WhereStr & "AND (PART_TYPE = " & PART_TYPE & ") "
+         End If
+      End If
+      
+       If FROM_DATE > -1 Then
+         TempDate = DateToStringIntLow(Trim(FROM_DATE))
+         If WhereStr = "" Then
+            WhereStr = "WHERE (DOCUMENT_DATE >= '" & ChangeQuote(TempDate) & "')"
+         Else
+            WhereStr = WhereStr & "AND (DOCUMENT_DATE >= '" & ChangeQuote(TempDate) & "')"
+         End If
+      End If
+   
+      If TO_DATE > -1 Then
+         TempDate = DateToStringIntHi(Trim(TO_DATE))
+         If WhereStr = "" Then
+            WhereStr = "WHERE (DOCUMENT_DATE <= '" & ChangeQuote(TempDate) & "')"
+         Else
+            WhereStr = WhereStr & "AND (DOCUMENT_DATE <= '" & ChangeQuote(TempDate) & "')"
+         End If
+      End If
+'   End If
+   
+   If Trim(PART_NO) <> "" Then
+      If WildCard(PART_NO, SubLen, NewStr) Then
+         If WhereStr = "" Then
+            WhereStr = "WHERE (SUBSTR(PART_NO,1," & SubLen & ") = '" & ChangeQuote(Trim(NewStr)) & "')"
+         Else
+            WhereStr = WhereStr & "AND (SUBSTR(PART_NO,1," & SubLen & ") = '" & ChangeQuote(Trim(NewStr)) & "')"
+         End If
+      Else
+         If WhereStr = "" Then
+            WhereStr = "WHERE (PART_NO = '" & ChangeQuote(Trim(PART_NO)) & "')"
+         Else
+            WhereStr = WhereStr & "AND (PART_NO = '" & ChangeQuote(Trim(PART_NO)) & "')"
+         End If
+      End If
+   End If
+   
+   
+   
+   If GUI_ID > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (GUI_ID = " & GUI_ID & ") "
+      Else
+         WhereStr = WhereStr & "AND (GUI_ID = " & GUI_ID & ") "
+      End If
+   End If
+   
+   If FROM_TX_SEQ > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (TRANSACTION_SEQ > " & FROM_TX_SEQ & ") "
+      Else
+         WhereStr = WhereStr & "AND (TRANSACTION_SEQ > " & FROM_TX_SEQ & ") "
+      End If
+   End If
+   
+   If TO_TX_SEQ > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (TRANSACTION_SEQ < " & TO_TX_SEQ & ") "
+      Else
+         WhereStr = WhereStr & "AND (TRANSACTION_SEQ < " & TO_TX_SEQ & ") "
+      End If
+   End If
+   
+   If Len(PARENT_FLAG) > 0 Then
+      If Len(WhereStr) <= 0 Then
+         WhereStr = "WHERE (CAPITAL_FLAG = '" & PARENT_FLAG & "') "
+      Else
+         WhereStr = WhereStr & "AND (CAPITAL_FLAG = '" & PARENT_FLAG & "') "
+      End If
+   End If
+   
+   If Ind = 15 Then
+      If Len(HOUSE_SALE_FLAG) > 0 Then
+         If Len(WhereStr) <= 0 Then
+            WhereStr = "WHERE (HS.SALE_FLAG = '" & HOUSE_SALE_FLAG & "') "
+         Else
+            WhereStr = WhereStr & "AND (HS.SALE_FLAG = '" & HOUSE_SALE_FLAG & "') "
+         End If
+      End If
+      
+      If HOUSE_GROUP_ID > 0 Then
+         If Len(WhereStr) <= 0 Then
+            WhereStr = "WHERE (LOCATION_ID IN (SELECT LOCATION_ID FROM HGROUP_ITEM WHERE (HOUSE_GROUP_ID = " & HOUSE_GROUP_ID & ") AND (SELECT_FLAG = 'Y')))"
+         Else
+            WhereStr = WhereStr & "AND (LOCATION_ID IN (SELECT LOCATION_ID FROM HGROUP_ITEM WHERE (HOUSE_GROUP_ID = " & HOUSE_GROUP_ID & ") AND (SELECT_FLAG = 'Y')))"
+         End If
+      End If
+   End If
+   
+   GroupByStr = ""
+   If Ind = 3 Then
+      GroupByStr = "GROUP BY PI.PART_NO, II.LOCATION_ID, PI.PIG_TYPE "
+   ElseIf Ind = 5 Then
+      GroupByStr = "GROUP BY II.PART_ITEM_ID "
+   ElseIf Ind = 6 Then
+      GroupByStr = "GROUP BY II.PART_ITEM_ID, IVD.DOCUMENT_TYPE, IVD.SALE_FLAG "
+   ElseIf Ind = 11 Then
+      GroupByStr = "GROUP BY II.LOCATION_ID, IVD.DOCUMENT_TYPE "
+   ElseIf Ind = 13 Then
+      GroupByStr = "GROUP BY II.PART_ITEM_ID, IVD.DOCUMENT_TYPE "
+   ElseIf Ind = 14 Then
+      GroupByStr = "GROUP BY II.PART_ITEM_ID,  II.LOCATION_ID "
+   ElseIf Ind = 15 Then
+      GroupByStr = "GROUP BY II.PART_ITEM_ID "
+   ElseIf Ind = 18 Then
+      GroupByStr = "GROUP BY II.PART_ITEM_ID,  II.LOCATION_ID "
+   ElseIf Ind = 20 Then
+      GroupByStr = "GROUP BY II.LOCATION_ID, II.PART_ITEM_ID, II.PIG_STATUS "
+   ElseIf Ind = 21 Then
+      GroupByStr = "GROUP BY II.PART_ITEM_ID,  II.PIG_STATUS "
+   ElseIf Ind = 22 Then
+      GroupByStr = "GROUP BY II.LOCATION_ID "
+   ElseIf Ind = 24 Then
+      GroupByStr = "GROUP BY PI.PIG_TYPE "
+   ElseIf Ind = 25 Then
+      GroupByStr = "GROUP BY PI.PIG_TYPE, IVD.DOCUMENT_TYPE "
+   End If
+   
+   OrderByStr = ""
+   OrderTypeStr = ""
+
+   If Ind = 1 Then
+'      If OrderBy = 1 Then
+'         OrderByStr = "ORDER BY IMPORT_ITEM_ID "
+'      ElseIf OrderBy = 2 Then
+'         OrderByStr = "ORDER BY IMPORT_ITEM_ID "
+'      ElseIf OrderBy = 3 Then
+'         OrderByStr = "ORDER BY DOCUMENT_DATE DESC, TRANSACTION_SEQ "
+'      ElseIf OrderBy = 4 Then
+'         OrderByStr = "ORDER BY LOCATION_ID DESC, DOCUMENT_DATE DESC, TRANSACTION_SEQ "
+'      ElseIf OrderBy = 5 Then
+'         OrderByStr = "ORDER BY PT.PART_TYPE_NO "
+'      ElseIf OrderBy = 6 Then
+'         OrderByStr = "ORDER BY PI.PART_NO "
+'      ElseIf OrderBy = 7 Then
+'         OrderByStr = "ORDER BY IVD.DOCUMENT_DATE "
+'      ElseIf OrderBy = 8 Then
+'         OrderByStr = "ORDER BY IVD.DOCUMENT_NO "
+'      ElseIf OrderBy = 9 Then
+'         OrderByStr = "ORDER BY LC.LOCATION_NO "
+'      ElseIf OrderBy = 10 Then
+'         If OrderType = 1 Then
+'            OrderByStr = "ORDER BY IVD.DOCUMENT_DATE ASC, II.TRANSACTION_SEQ  "
+'         Else
+'            OrderByStr = "ORDER BY IVD.DOCUMENT_DATE ASC, II.TRANSACTION_SEQ  "
+'         End If
+'      ElseIf OrderBy = 11 Then
+'         OrderByStr = "ORDER BY DOCUMENT_DATE, DOCUMENT_NO  "
+'      ElseIf OrderBy = 12 Then
+'         OrderByStr = "ORDER BY TRANSACTION_SEQ "
+'      Else
+'         OrderByStr = "ORDER BY IMPORT_ITEM_ID "
+'      End If
+'   ElseIf Ind = 2 Then
+'      If OrderBy = 1 Then
+'         OrderByStr = "ORDER BY PART_TYPE_NO "
+'      ElseIf OrderBy = 2 Then
+'         OrderByStr = "ORDER BY PART_NO "
+'      ElseIf OrderBy = 3 Then
+'         OrderByStr = "ORDER BY DOCUMENT_NO "
+'      ElseIf OrderBy = 4 Then
+'         OrderByStr = "ORDER BY DOCUMENT_DATE "
+'      Else
+'         OrderByStr = "ORDER BY IMPORT_ITEM_ID "
+'      End If
+   ElseIf Ind = 3 Then
+      OrderByStr = "ORDER BY PI.PART_NO "
+   ElseIf Ind = 4 Then
+      OrderByStr = "ORDER BY PI.PART_NO, PI.PIG_TYPE "
+   ElseIf Ind = 5 Then
+      OrderByStr = "ORDER BY PI.PART_TYPE "
+   ElseIf Ind = 6 Then
+      OrderByStr = "ORDER BY PI.PART_TYPE "
+   ElseIf Ind = 7 Then
+      If OrderType = 1 Then
+         If OrderBy = 1 Then
+            OrderByStr = "ORDER BY PT.PART_TYPE_NO ASC, PI.PART_NO ASC, IVD.DOCUMENT_DATE ASC, PR.PRIORITY1 ASC, IVD.DOCUMENT_NO ASC "
+         ElseIf OrderBy = 2 Then
+            OrderByStr = "ORDER BY IVD.DOCUMENT_DATE ASC, PR.PRIORITY1 ASC, IVD.DOCUMENT_NO ASC, II.TRANSACTION_SEQ ASC "
+         End If
+      Else
+         If OrderBy = 1 Then
+            OrderByStr = "ORDER BY PT.PART_TYPE_NO DESC, PI.PART_NO ASC, IVD.DOCUMENT_DATE ASC, PR.PRIORITY1 ASC, IVD.DOCUMENT_NO ASC "
+         ElseIf OrderBy = 2 Then
+            OrderByStr = "ORDER BY IVD.DOCUMENT_DATE ASC, PR.PRIORITY1 DESC, IVD.DOCUMENT_NO ASC, II.TRANSACTION_SEQ ASC "
+         End If
+      End If
+        
+'      If OrderType = 1 Then
+'         OrderByStr = "ORDER BY PT.PART_TYPE_NO ASC, PI.PART_NO ASC, IVD.DOCUMENT_DATE ASC, II.TRANSACTION_SEQ ASC "
+'      Else
+'         OrderByStr = "ORDER BY PT.PART_TYPE_NO DESC, PI.PART_NO ASC, IVD.DOCUMENT_DATE ASC, II.TRANSACTION_SEQ ASC "
+'      End If
+   ElseIf Ind = 8 Then
+      OrderByStr = "ORDER BY II.PART_ITEM_ID "
+   ElseIf Ind = 9 Then
+      If OrderBy = 1 Then
+         OrderByStr = "ORDER BY PART_ITEM_ID "
+      Else
+         OrderByStr = "ORDER BY PART_NO "
+      End If
+   ElseIf Ind = 10 Then
+      If OrderType = 1 Then
+         OrderByStr = "ORDER BY PT.PART_TYPE_NO ASC, PI.PART_NO ASC, IVD.DOCUMENT_DATE ASC, IVD.DOCUMENT_NO "
+      Else
+         OrderByStr = "ORDER BY PT.PART_TYPE_NO DESC, PI.PART_NO ASC, IVD.DOCUMENT_DATE ASC, IVD.DOCUMENT_NO "
+      End If
+   ElseIf Ind = 11 Then
+      OrderByStr = "ORDER BY LOCATION_ID "
+   ElseIf Ind = 12 Then
+      OrderByStr = "ORDER BY LOCATION_ID "
+   ElseIf Ind = 13 Then
+      OrderByStr = "ORDER BY PART_ITEM_ID "
+   ElseIf Ind = 14 Then
+      OrderByStr = "ORDER BY PART_ITEM_ID "
+   ElseIf Ind = 15 Then
+      OrderByStr = "ORDER BY PART_ITEM_ID "
+   ElseIf Ind = 16 Then
+      OrderByStr = "ORDER BY PART_ITEM_ID "
+   ElseIf Ind = 17 Then
+      OrderByStr = "ORDER BY PART_ITEM_ID "
+   ElseIf Ind = 18 Then
+      OrderByStr = "ORDER BY PART_ITEM_ID "
+   ElseIf Ind = 19 Then
+      OrderByStr = "ORDER BY PART_ITEM_ID "
+   ElseIf Ind = 20 Then
+      OrderByStr = "ORDER BY PART_ITEM_ID "
+   ElseIf Ind = 21 Then
+      OrderByStr = "ORDER BY PART_ITEM_ID "
+   ElseIf Ind = 22 Then
+      OrderByStr = "ORDER BY LOCATION_ID "
+   ElseIf Ind = 23 Then
+      OrderByStr = "ORDER BY IMPORT_ITEM_ID "
+   ElseIf Ind = 24 Then
+      OrderByStr = "ORDER BY IMPORT_ITEM_ID "
+   ElseIf Ind = 25 Then
+      OrderByStr = "ORDER BY IMPORT_ITEM_ID "
+   End If
+   
+'   If Ind <> 7 Then
+'      If OrderType = 1 Then
+'         OrderTypeStr = "ASC "
+'      ElseIf OrderType = 2 Then
+'         OrderTypeStr = "DESC "
+'      Else
+'         OrderTypeStr = "ASC "
+'      End If
+'   End If
+   
+   SQL1 = SelectStr1 & FromStr & WhereStr & GroupByStr & OrderByStr & OrderTypeStr
+   SQL2 = SelectStr2 & FromStr & WhereStr
+   
+   Call glbDatabaseMngr.GetRs(SQL1, SQL2, False, ItemCount, Rs, glbErrorLog)
+End Function
+
+Public Function CopyObject(O As CImportItem)
+   IMPORT_ITEM_ID = O.IMPORT_ITEM_ID
+   INVENTORY_DOC_ID = O.INVENTORY_DOC_ID
+   PART_ITEM_ID = O.PART_ITEM_ID
+   LOCATION_ID = O.LOCATION_ID
+   ACTUAL_UNIT_PRICE = O.ACTUAL_UNIT_PRICE
+   INCLUDE_UNIT_PRICE = O.INCLUDE_UNIT_PRICE
+   PREVIOUS_PRICE = O.PREVIOUS_PRICE
+   PREVIOUS_AMOUNT = O.PREVIOUS_AMOUNT
+   NEW_PRICE = O.NEW_PRICE
+   IMPORT_AMOUNT = O.IMPORT_AMOUNT
+   CURRENT_AMOUNT = O.CURRENT_AMOUNT
+   TRANSACTION_SEQ = O.TRANSACTION_SEQ
+   GUI_ID = O.GUI_ID
+   CALCULATE_FLAG = O.CALCULATE_FLAG
+   FATHER_NO = O.FATHER_NO
+   MOTHER_NO = O.MOTHER_NO
+   TOTAL_WEIGHT = O.TOTAL_WEIGHT
+   TOTAL_ACTUAL_PRICE = O.TOTAL_ACTUAL_PRICE
+   TOTAL_INCLUDE_PRICE = O.TOTAL_INCLUDE_PRICE
+   
+   IMPORT_DESC = O.IMPORT_DESC
+   
+   OLD_IMPORT_AMOUNT = O.OLD_IMPORT_AMOUNT
+   OLD_LOCATION_ID = O.OLD_LOCATION_ID
+   
+   PART_TYPE = O.PART_TYPE
+   PART_TYPE_NAME = O.PART_TYPE_NAME
+   PART_TYPE_NO = O.PART_TYPE_NO
+   LOCATION_NO = O.LOCATION_NO
+   LOCATION_NAME = O.LOCATION_NAME
+   PART_NO = O.PART_NO
+   PART_DESC = O.PART_DESC
+   TX_TYPE = O.TX_TYPE
+   PIG_TYPE = O.PIG_TYPE
+   UNIT_NAME = O.UNIT_NAME
+   DOCUMENT_DATE = O.DOCUMENT_DATE
+   BIRTH_DATE = O.BIRTH_DATE
+   DOCUMENT_NO = O.DOCUMENT_NO
+   DOCUMENT_TYPE = O.DOCUMENT_TYPE
+End Function
+
+Public Function PopulateFromRS(Ind As Long, Rs As ADODB.Recordset)
+   If Ind = 1 Or Ind = 9999 Then
+      IMPORT_ITEM_ID = NVLI(Rs("IMPORT_ITEM_ID"), -1)
+      INVENTORY_DOC_ID = NVLI(Rs("INVENTORY_DOC_ID"), -1)
+      PART_ITEM_ID = NVLI(Rs("PART_ITEM_ID"), -1)
+      LOCATION_ID = NVLI(Rs("LOCATION_ID"), -1)
+      ACTUAL_UNIT_PRICE = NVLD(Rs("ACTUAL_UNIT_PRICE"), 0)
+      INCLUDE_UNIT_PRICE = NVLD(Rs("INCLUDE_UNIT_PRICE"), 0)
+      PREVIOUS_PRICE = NVLD(Rs("PREVIOUS_PRICE"), 0)
+      PREVIOUS_AMOUNT = NVLD(Rs("PREVIOUS_AMOUNT"), 0)
+      NEW_PRICE = NVLD(Rs("NEW_PRICE"), 0)
+      IMPORT_AMOUNT = NVLD(Rs("IMPORT_AMOUNT"), 0)
+      CURRENT_AMOUNT = NVLD(Rs("CURRENT_AMOUNT"), 0)
+      TRANSACTION_SEQ = NVLI(Rs("TRANSACTION_SEQ"), 0)
+      GUI_ID = NVLI(Rs("GUI_ID"), -1)
+      CALCULATE_FLAG = NVLS(Rs("CALCULATE_FLAG"), "")
+      FATHER_NO = NVLS(Rs("FATHER_NO"), "")
+      MOTHER_NO = NVLS(Rs("MOTHER_NO"), "")
+      TOTAL_WEIGHT = NVLD(Rs("TOTAL_WEIGHT"), 0)
+      TOTAL_ACTUAL_PRICE = NVLD(Rs("TOTAL_ACTUAL_PRICE"), 0)
+      TOTAL_INCLUDE_PRICE = NVLD(Rs("TOTAL_INCLUDE_PRICE"), 0)
+      EXPENSE_TYPE = NVLI(Rs("EXPENSE_TYPE"), -1)
+      PIG_STATUS = NVLI(Rs("PIG_STATUS"), -1)
+      REPLACE_FLAG = NVLS(Rs("REPLACE_FLAG"), "")
+      ACTUAL_AMOUNT = NVLD(Rs("ACTUAL_AMOUNT"), 0)
+      ACTUAL_PRICE = NVLD(Rs("ACTUAL_PRICE"), 0)
+      
+      IMPORT_DESC = NVLS(Rs("IMPORT_DESC"), "")
+      
+      OLD_IMPORT_AMOUNT = IMPORT_AMOUNT
+      OLD_LOCATION_ID = LOCATION_ID
+      
+      PARENT_ID = NVLI(Rs("PARENT_ID"), -1)
+      OLD_PARENT_ID = PARENT_ID
+      PART_TYPE = NVLI(Rs("PART_TYPE"), -1)
+      PART_TYPE_NAME = NVLS(Rs("PART_TYPE_NAME"), "")
+      PART_TYPE_NO = NVLS(Rs("PART_TYPE_NO"), "")
+      LOCATION_NO = NVLS(Rs("LOCATION_NO"), "")
+      LOCATION_NAME = NVLS(Rs("LOCATION_NAME"), "")
+      PART_NO = NVLS(Rs("PART_NO"), "")
+      PART_DESC = NVLS(Rs("PART_DESC"), "")
+      TX_TYPE = "I" 'Import
+      PIG_TYPE = NVLS(Rs("PIG_TYPE"), "")
+      UNIT_NAME = NVLS(Rs("UNIT_NAME"), "")
+      DOCUMENT_DATE = InternalDateToDate(NVLS(Rs("DOCUMENT_DATE"), ""))
+      BIRTH_DATE = InternalDateToDate(NVLS(Rs("BIRTH_DATE"), ""))
+      DOCUMENT_NO = NVLS(Rs("DOCUMENT_NO"), "")
+      DOCUMENT_TYPE = NVLI(Rs("DOCUMENT_TYPE"), -1)
+      COMMIT_FLAG = NVLS(Rs("COMMIT_FLAG"), "")
+      
+      ElseIf Ind = 8888 Then
+      IMPORT_ITEM_ID = NVLI(Rs("IMPORT_ITEM_ID"), -1)
+      INVENTORY_DOC_ID = NVLI(Rs("INVENTORY_DOC_ID"), -1)
+      PART_ITEM_ID = NVLI(Rs("PART_ITEM_ID"), -1)
+      LOCATION_ID = NVLI(Rs("LOCATION_ID"), -1)
+      ACTUAL_UNIT_PRICE = NVLD(Rs("ACTUAL_UNIT_PRICE"), 0)
+      INCLUDE_UNIT_PRICE = NVLD(Rs("INCLUDE_UNIT_PRICE"), 0)
+      PREVIOUS_PRICE = NVLD(Rs("PREVIOUS_PRICE"), 0)
+      PREVIOUS_AMOUNT = NVLD(Rs("PREVIOUS_AMOUNT"), 0)
+      NEW_PRICE = NVLD(Rs("NEW_PRICE"), 0)
+      IMPORT_AMOUNT = NVLD(Rs("IMPORT_AMOUNT"), 0)
+      CURRENT_AMOUNT = NVLD(Rs("CURRENT_AMOUNT"), 0)
+      TRANSACTION_SEQ = NVLI(Rs("TRANSACTION_SEQ"), 0)
+      GUI_ID = NVLI(Rs("GUI_ID"), -1)
+      CALCULATE_FLAG = NVLS(Rs("CALCULATE_FLAG"), "")
+      FATHER_NO = NVLS(Rs("FATHER_NO"), "")
+      MOTHER_NO = NVLS(Rs("MOTHER_NO"), "")
+      TOTAL_WEIGHT = NVLD(Rs("TOTAL_WEIGHT"), 0)
+      TOTAL_ACTUAL_PRICE = NVLD(Rs("TOTAL_ACTUAL_PRICE"), 0)
+      TOTAL_INCLUDE_PRICE = NVLD(Rs("TOTAL_INCLUDE_PRICE"), 0)
+      EXPENSE_TYPE = NVLI(Rs("EXPENSE_TYPE"), -1)
+      PIG_STATUS = NVLI(Rs("PIG_STATUS"), -1)
+      REPLACE_FLAG = NVLS(Rs("REPLACE_FLAG"), "")
+      ACTUAL_AMOUNT = NVLD(Rs("ACTUAL_AMOUNT"), 0)
+      ACTUAL_PRICE = NVLD(Rs("ACTUAL_PRICE"), 0)
+      
+      IMPORT_DESC = NVLS(Rs("IMPORT_DESC"), "")
+      
+      OLD_IMPORT_AMOUNT = IMPORT_AMOUNT
+      OLD_LOCATION_ID = LOCATION_ID
+      
+      PARENT_ID = NVLI(Rs("PARENT_ID"), -1)
+      OLD_PARENT_ID = PARENT_ID
+      PART_TYPE = NVLI(Rs("PART_TYPE"), -1)
+      PART_TYPE_NAME = NVLS(Rs("PART_TYPE_NAME"), "")
+      PART_TYPE_NO = NVLS(Rs("PART_TYPE_NO"), "")
+      LOCATION_NO = NVLS(Rs("LOCATION_NO"), "")
+      LOCATION_NAME = NVLS(Rs("LOCATION_NAME"), "")
+      PART_NO = NVLS(Rs("PART_NO"), "")
+      PART_DESC = NVLS(Rs("PART_DESC"), "")
+      TX_TYPE = "I" 'Import
+      PIG_TYPE = NVLS(Rs("PIG_TYPE"), "")
+      UNIT_NAME = NVLS(Rs("UNIT_NAME"), "")
+      DOCUMENT_DATE = InternalDateToDate(NVLS(Rs("DOCUMENT_DATE"), ""))
+      BIRTH_DATE = InternalDateToDate(NVLS(Rs("BIRTH_DATE"), ""))
+      DOCUMENT_NO = NVLS(Rs("DOCUMENT_NO"), "")
+      DOCUMENT_TYPE = NVLI(Rs("DOCUMENT_TYPE"), -1)
+      COMMIT_FLAG = NVLS(Rs("COMMIT_FLAG"), "")
+       SUPPLIER_CODE = NVLS(Rs(" SUPPLIER_CODE"), "")
+      PART_GROUP_NAME = NVLS(Rs("PART_GROUP_NAME "), "")
+'      SUPPLIER_CODE
+   ElseIf Ind = 3 Then
+      PART_NO = NVLS(Rs("PART_NO"), "")
+      PIG_TYPE = NVLS(Rs("PIG_TYPE"), "")
+      LOCATION_ID = NVLI(Rs("LOCATION_ID"), -1)
+      IMPORT_AMOUNT = NVLD(Rs("IMPORT_AMOUNT"), 0)
+   ElseIf Ind = 5 Then
+      PART_ITEM_ID = NVLI(Rs("PART_ITEM_ID"), 0)
+      SUM_ALL_IMPORT_AMT = NVLD(Rs("SUM_ALL_IMPORT_AMT"), 0)
+      SUM_ALL_IMPORT = NVLD(Rs("SUM_ALL_IMPORT"), 0)
+   ElseIf Ind = 6 Then
+      PART_ITEM_ID = NVLI(Rs("PART_ITEM_ID"), 0)
+      DOCUMENT_TYPE = NVLI(Rs("DOCUMENT_TYPE"), 0)
+      SALE_FLAG = NVLS(Rs("SALE_FLAG"), "")
+      SUM_ALL_IMPORT_AMT = NVLD(Rs("SUM_IMPORT_AMT"), 0)
+      SUM_ALL_IMPORT = NVLD(Rs("SUM_IMPORT"), 0)
+   ElseIf (Ind = 7) Or (Ind = 10) Then
+      IMPORT_ITEM_ID = NVLI(Rs("IMPORT_ITEM_ID"), 0)
+      PART_ITEM_ID = NVLI(Rs("PART_ITEM_ID"), 0)
+      LOCATION_ID = NVLI(Rs("LOCATION_ID"), 0)
+      DOCUMENT_TYPE = NVLI(Rs("DOCUMENT_TYPE"), 0)
+      DOCUMENT_DATE = InternalDateToDate(NVLS(Rs("DOCUMENT_DATE"), ""))
+      DOCUMENT_NO = NVLS(Rs("DOCUMENT_NO"), "")
+      PIG_TYPE = NVLS(Rs("PIG_TYPE"), "")
+      PIG_FLAG = NVLS(Rs("PIG_FLAG"), "")
+      PIG_STATUS = NVLI(Rs("PIG_STATUS"), 0)
+      PART_TYPE_NO = NVLS(Rs("PART_TYPE_NO"), "")
+      PART_TYPE_NAME = NVLS(Rs("PART_TYPE_NAME"), "")
+      PART_NO = NVLS(Rs("PART_NO"), "")
+      UNIT_NAME = NVLS(Rs("UNIT_NAME"), "")
+      PART_DESC = NVLS(Rs("PART_DESC"), "")
+      IMPORT_AMOUNT = NVLD(Rs("TX_AMOUNT"), 0)
+      TOTAL_INCLUDE_PRICE = NVLD(Rs("TX_TOTAL_PRICE"), 0)
+      NEW_PRICE = NVLD(Rs("NEW_PRICE"), 0)
+      CURRENT_AMOUNT = NVLD(Rs("CURRENT_AMOUNT"), 0)
+      TRANSACTION_SEQ = NVLI(Rs("TRANSACTION_SEQ"), 0)
+      PRIORITY1 = NVLI(Rs("PRIORITY1"), -1)
+      GUI_ID = NVLI(Rs("GUI_ID"), -1)
+      COMMIT_FLAG = NVLS(Rs("COMMIT_FLAG"), "")
+      EXPENSE_TYPE = NVLI(Rs("EXPENSE_TYPE"), 0)
+      REPLACE_FLAG = NVLS(Rs("REPLACE_FLAG"), "")
+      CUS_ID = NVLI(Rs("CUS_ID"), -1)
+      ACTUAL_AMOUNT = NVLD(Rs("ACTUAL_AMOUNT"), 0)
+      ACTUAL_PRICE = NVLD(Rs("ACTUAL_PRICE"), 0)
+   ElseIf Ind = 8 Then
+      PART_ITEM_ID = NVLI(Rs("PART_ITEM_ID"), -1)
+      LOCATION_ID = NVLI(Rs("LOCATION_ID"), -1)
+      CURRENT_AMOUNT = NVLD(Rs("CURRENT_AMOUNT"), 0)
+      NEW_PRICE = NVLD(Rs("NEW_PRICE"), 0)
+      TRANSACTION_SEQ = NVLI(Rs("TRANSACTION_SEQ"), -1)
+      DOCUMENT_DATE = InternalDateToDate(NVLS(Rs("DOCUMENT_DATE"), ""))
+   ElseIf Ind = 9 Then
+      PART_ITEM_ID = NVLI(Rs("PART_ITEM_ID"), -1)
+      PART_NO = NVLS(Rs("PART_NO"), "")
+      PART_DESC = NVLS(Rs("PART_DESC"), "")
+      PART_TYPE_NO = NVLS(Rs("PART_TYPE_NO"), "")
+      PART_TYPE_NAME = NVLS(Rs("PART_TYPE_NAME"), "")
+      PIG_TYPE = NVLS(Rs("PIG_TYPE"), "")
+   ElseIf Ind = 11 Then
+      LOCATION_ID = NVLI(Rs("LOCATION_ID"), 0)
+      DOCUMENT_TYPE = NVLI(Rs("DOCUMENT_TYPE"), 0)
+      SUM_ALL_IMPORT_AMT = NVLD(Rs("SUM_IMPORT_AMT"), 0)
+      SUM_ALL_IMPORT = NVLD(Rs("SUM_IMPORT"), 0)
+   ElseIf Ind = 12 Then
+      LOCATION_ID = NVLI(Rs("LOCATION_ID"), 0)
+   ElseIf Ind = 13 Then
+      PART_ITEM_ID = NVLI(Rs("PART_ITEM_ID"), 0)
+      DOCUMENT_TYPE = NVLI(Rs("DOCUMENT_TYPE"), 0)
+      SUM_ALL_IMPORT_AMT = NVLD(Rs("SUM_IMPORT_AMT"), 0)
+      SUM_ALL_IMPORT = NVLD(Rs("SUM_IMPORT"), 0)
+   ElseIf Ind = 14 Then
+      PART_ITEM_ID = NVLI(Rs("PART_ITEM_ID"), 0)
+      LOCATION_ID = NVLI(Rs("LOCATION_ID"), 0)
+      IMPORT_AMOUNT = NVLD(Rs("IMPORT_AMOUNT"), 0)
+      TOTAL_WEIGHT = NVLD(Rs("TOTAL_WEIGHT"), 0)
+   ElseIf Ind = 15 Then
+      PART_ITEM_ID = NVLI(Rs("PART_ITEM_ID"), 0)
+      IMPORT_AMOUNT = NVLD(Rs("IMPORT_AMOUNT"), 0)
+      TOTAL_INCLUDE_PRICE = NVLD(Rs("TOTAL_INCLUDE_PRICE"), 0)
+      TOTAL_ACTUAL_PRICE = NVLD(Rs("TOTAL_ACTUAL_PRICE"), 0)
+      TOTAL_WEIGHT = NVLD(Rs("TOTAL_WEIGHT"), 0)
+   ElseIf Ind = 16 Then
+      IMPORT_AMOUNT = NVLD(Rs("IMPORT_AMOUNT"), 0)
+   ElseIf Ind = 17 Then
+      IMPORT_ITEM_ID = NVLI(Rs("IMPORT_ITEM_ID"), -1)
+      INVENTORY_DOC_ID = NVLI(Rs("INVENTORY_DOC_ID"), -1)
+      PART_ITEM_ID = NVLI(Rs("PART_ITEM_ID"), -1)
+      LOCATION_ID = NVLI(Rs("LOCATION_ID"), -1)
+      ACTUAL_UNIT_PRICE = NVLD(Rs("ACTUAL_UNIT_PRICE"), 0)
+      INCLUDE_UNIT_PRICE = NVLD(Rs("INCLUDE_UNIT_PRICE"), 0)
+      PREVIOUS_PRICE = NVLD(Rs("PREVIOUS_PRICE"), 0)
+      PREVIOUS_AMOUNT = NVLD(Rs("PREVIOUS_AMOUNT"), 0)
+      NEW_PRICE = NVLD(Rs("NEW_PRICE"), 0)
+      IMPORT_AMOUNT = NVLD(Rs("IMPORT_AMOUNT"), 0)
+      CURRENT_AMOUNT = NVLD(Rs("CURRENT_AMOUNT"), 0)
+      TRANSACTION_SEQ = NVLI(Rs("TRANSACTION_SEQ"), 0)
+      GUI_ID = NVLI(Rs("GUI_ID"), -1)
+      CALCULATE_FLAG = NVLS(Rs("CALCULATE_FLAG"), "")
+      FATHER_NO = NVLS(Rs("FATHER_NO"), "")
+      MOTHER_NO = NVLS(Rs("MOTHER_NO"), "")
+      TOTAL_WEIGHT = NVLD(Rs("TOTAL_WEIGHT"), 0)
+      TOTAL_ACTUAL_PRICE = NVLD(Rs("TOTAL_ACTUAL_PRICE"), 0)
+      TOTAL_INCLUDE_PRICE = NVLD(Rs("TOTAL_INCLUDE_PRICE"), 0)
+   ElseIf Ind = 18 Then
+      PART_ITEM_ID = NVLI(Rs("PART_ITEM_ID"), 0)
+      LOCATION_ID = NVLI(Rs("LOCATION_ID"), 0)
+      IMPORT_AMOUNT = NVLD(Rs("IMPORT_AMOUNT"), 0)
+      TOTAL_INCLUDE_PRICE = NVLD(Rs("TOTAL_INCLUDE_PRICE"), 0)
+   ElseIf Ind = 19 Then
+      PART_ITEM_ID = NVLI(Rs("PART_ITEM_ID"), 0)
+      LOCATION_ID = NVLI(Rs("LOCATION_ID"), 0)
+      PIG_STATUS = NVLD(Rs("PIG_STATUS"), 0)
+   ElseIf Ind = 20 Then
+      PART_ITEM_ID = NVLI(Rs("PART_ITEM_ID"), 0)
+      LOCATION_ID = NVLI(Rs("LOCATION_ID"), 0)
+      PIG_STATUS = NVLD(Rs("PIG_STATUS"), 0)
+      IMPORT_AMOUNT = NVLD(Rs("IMPORT_AMOUNT"), 0)
+   ElseIf Ind = 21 Then
+      PART_ITEM_ID = NVLI(Rs("PART_ITEM_ID"), 0)
+      PIG_STATUS = NVLI(Rs("PIG_STATUS"), 0)
+      IMPORT_AMOUNT = NVLD(Rs("IMPORT_AMOUNT"), 0)
+      TOTAL_INCLUDE_PRICE = NVLD(Rs("TOTAL_INCLUDE_PRICE"), 0)
+   ElseIf Ind = 22 Then
+      LOCATION_ID = NVLI(Rs("LOCATION_ID"), 0)
+      IMPORT_AMOUNT = NVLD(Rs("IMPORT_AMOUNT"), 0)
+   ElseIf Ind = 24 Then
+      PIG_TYPE = NVLS(Rs("PIG_TYPE"), "")
+      IMPORT_AMOUNT = NVLD(Rs("IMPORT_AMOUNT"), 0)
+   ElseIf Ind = 25 Then
+      PIG_TYPE = NVLS(Rs("PIG_TYPE"), "")
+      DOCUMENT_TYPE = NVLI(Rs("DOCUMENT_TYPE"), 0)
+      IMPORT_AMOUNT = NVLD(Rs("IMPORT_AMOUNT"), 0)
+   ElseIf Ind = 26 Then
+      PART_TYPE = NVLI(Rs("PART_TYPE"), -1)
+      YYYYMM2 = NVLS(Rs("YYYYMM2"), "")
+      TOTAL_INCLUDE_PRICE = NVLD(Rs("TOTAL_INCLUDE_PRICE"), 0)
+   ElseIf Ind = 27 Then
+      PART_ITEM_ID = NVLI(Rs("PART_ITEM_ID"), -1)
+      YYYYMM = NVLS(Rs("YYYYMM"), "")
+      TOTAL_INCLUDE_PRICE = NVLD(Rs("TOTAL_INCLUDE_PRICE"), 0)
+      IMPORT_AMOUNT = NVLD(Rs("IMPORT_AMOUNT"), 0)
+   ElseIf Ind = 28 Then
+      PART_ITEM_ID = NVLI(Rs("PART_ITEM_ID"), -1)
+      PART_NO = NVLS(Rs("PART_NO"), "")
+      PART_DESC = NVLS(Rs("PART_DESC"), "")
+      PART_TYPE = NVLS(Rs("PART_TYPE"), "")
+      PART_TYPE_NO = NVLS(Rs("PART_TYPE_NO"), "")
+      PART_TYPE_NAME = NVLS(Rs("PART_TYPE_NAME"), "")
+   ElseIf Ind = 29 Then
+      YYYYMM = NVLS(Rs("YYYYMM"), "")
+      TOTAL_INCLUDE_PRICE = NVLD(Rs("TOTAL_INCLUDE_PRICE"), 0)
+      IMPORT_AMOUNT = NVLD(Rs("IMPORT_AMOUNT"), 0)
+   ElseIf Ind = 30 Then
+      YYYYMM2 = NVLS(Rs("YYYYMM2"), "")
+      TOTAL_INCLUDE_PRICE = NVLD(Rs("TOTAL_INCLUDE_PRICE"), 0)
+      IMPORT_AMOUNT = NVLD(Rs("IMPORT_AMOUNT"), 0)
+      TOTAL_ACTUAL_PRICE = NVLD(Rs("TOTAL_ACTUAL_PRICE"), 0)
+   ElseIf Ind = 31 Then
+      FEED_GROUP = NVLI(Rs("FEED_GROUP"), 0)
+      IMPORT_AMOUNT = NVLD(Rs("IMPORT_AMOUNT"), 0)
+      TOTAL_INCLUDE_PRICE = NVLD(Rs("TOTAL_INCLUDE_PRICE"), 0)
+      TOTAL_ACTUAL_PRICE = NVLD(Rs("TOTAL_ACTUAL_PRICE"), 0)
+      TOTAL_WEIGHT = NVLD(Rs("TOTAL_WEIGHT"), 0)
+   ElseIf Ind = 32 Then
+      YYYYMM2 = NVLS(Rs("YYYYMM2"), "")
+      TOTAL_INCLUDE_PRICE = NVLD(Rs("TOTAL_INCLUDE_PRICE"), 0)
+      IMPORT_AMOUNT = NVLD(Rs("IMPORT_AMOUNT"), 0)
+      TOTAL_ACTUAL_PRICE = NVLD(Rs("TOTAL_ACTUAL_PRICE"), 0)
+      INTAKE_TYPE = NVLI(Rs("INTAKE_TYPE"), -1)
+   End If
+End Function
+Public Function AddEditData(Optional NewSeq As Boolean = True)
+Dim ServerDateTime As String
+Dim SQL1 As String
+Dim ID As Long
+Dim ID2 As Long
+Dim TempID1 As String
+
+   TempID1 = PIG_STATUS
+   If PIG_STATUS <= 0 Then
+      TempID1 = "NULL"
+   End If
+   
+   If REPLACE_FLAG = "" Then
+      REPLACE_FLAG = "N"
+   End If
+   
+   Call glbDatabaseMngr.GetServerDateTime(ServerDateTime, glbErrorLog)
+   
+   If AddEditMode = SHOW_ADD Then
+      Call glbDatabaseMngr.GetSeqID("IMPORT_ITEM_SEQ", ID, glbErrorLog)
+      If NewSeq Then
+         Call glbDatabaseMngr.GetSeqID("TRANSACTION_SEQUENCE_SEQ", ID2, glbErrorLog)
+      Else
+         ID2 = TRANSACTION_SEQ
+      End If
+      
+      SQL1 = "INSERT INTO IMPORT_ITEM " & _
+                     "( " & _
+                     "   IMPORT_ITEM_ID, " & _
+                     "   INVENTORY_DOC_ID, " & _
+                     "   PART_ITEM_ID, " & _
+                     "   LOCATION_ID, " & _
+                     "   ACTUAL_UNIT_PRICE, " & _
+                     "   INCLUDE_UNIT_PRICE, " & _
+                     "   PREVIOUS_PRICE, " & _
+                     "   PREVIOUS_AMOUNT, " & _
+                     "   NEW_PRICE, " & _
+                     "   IMPORT_AMOUNT, " & _
+                     "   CURRENT_AMOUNT, "
+            SQL1 = SQL1 & _
+                     "   TRANSACTION_SEQ, " & _
+                     "   GUI_ID, " & _
+                     "   CALCULATE_FLAG, " & _
+                     "   FATHER_NO, " & _
+                     "   MOTHER_NO, " & _
+                     "   TOTAL_WEIGHT, " & _
+                     "   TOTAL_ACTUAL_PRICE, " & _
+                     "   TOTAL_INCLUDE_PRICE, "
+               SQL1 = SQL1 & _
+                     "   BIRTH_DATE, " & _
+                     "   EXPENSE_TYPE, " & _
+                     "   PIG_STATUS, " & _
+                     "   REPLACE_FLAG, " & _
+                     "   ACTUAL_AMOUNT, " & _
+                     "   ACTUAL_PRICE, " & _
+                     "   INTAKE_TYPE, " & _
+                     "   IMPORT_DESC, " & _
+                     "   CREATE_DATE, " & _
+                    "    CREATE_BY, " & _
+                    "    MODIFY_DATE, " & _
+                    "    MODIFY_BY " & _
+                     ") " & _
+                     "VALUES " & _
+                     "( " & _
+                         ID & "," & _
+                         "" & INVENTORY_DOC_ID & "," & _
+                         "" & PART_ITEM_ID & "," & _
+                         "" & LOCATION_ID & "," & _
+                         "" & ACTUAL_UNIT_PRICE & "," & _
+                         "" & INCLUDE_UNIT_PRICE & "," & _
+                         "" & PREVIOUS_PRICE & "," & _
+                         "" & PREVIOUS_AMOUNT & "," & _
+                         "" & NEW_PRICE & ","
+               SQL1 = SQL1 & _
+                         "" & IMPORT_AMOUNT & "," & _
+                         "" & CURRENT_AMOUNT & "," & _
+                         "" & ID2 & "," & _
+                         "" & GUI_ID & "," & _
+                         "'" & CALCULATE_FLAG & "'," & _
+                         "'" & FATHER_NO & "'," & _
+                         "'" & MOTHER_NO & "'," & _
+                         "" & TOTAL_WEIGHT & "," & _
+                         "" & TOTAL_ACTUAL_PRICE & "," & _
+                         "" & TOTAL_INCLUDE_PRICE & "," & _
+                         "'" & DateToStringInt(BIRTH_DATE) & "'," & _
+                         "" & EXPENSE_TYPE & "," & _
+                         "" & TempID1 & "," & _
+                         "'" & REPLACE_FLAG & "'," & _
+                         "" & ACTUAL_AMOUNT & "," & _
+                         "" & ACTUAL_PRICE & "," & _
+                         "" & INTAKE_TYPE & "," & _
+                         "'" & ChangeQuote(Trim(IMPORT_DESC)) & "'," & _
+                         "'" & ServerDateTime & "'," & _
+                         glbUser.USER_ID & "," & _
+                         "'" & ServerDateTime & "'," & _
+                         glbUser.USER_ID & _
+                     ") "
+         IMPORT_ITEM_ID = ID
+   Else 'Show edit
+'      Call glbDatabaseMngr.GetSeqID("TRANSACTION_SEQUENCE_SEQ", ID2, glbErrorLog)
+
+      SQL1 = "UPDATE IMPORT_ITEM SET " & _
+                     "   INVENTORY_DOC_ID = " & INVENTORY_DOC_ID & ", " & _
+                     "   PART_ITEM_ID = " & PART_ITEM_ID & ", " & _
+                     "   LOCATION_ID = " & LOCATION_ID & ", " & _
+                     "   ACTUAL_UNIT_PRICE = " & ACTUAL_UNIT_PRICE & ", " & _
+                     "   INCLUDE_UNIT_PRICE = " & INCLUDE_UNIT_PRICE & ", " & _
+                     "   PREVIOUS_PRICE = " & PREVIOUS_PRICE & ", " & _
+                     "   PREVIOUS_AMOUNT = " & PREVIOUS_AMOUNT & ", " & _
+                     "   NEW_PRICE = " & NEW_PRICE & ", " & _
+                     "   IMPORT_AMOUNT = " & IMPORT_AMOUNT & ", " & _
+                     "   CURRENT_AMOUNT = " & CURRENT_AMOUNT & ", " & _
+                     "   TRANSACTION_SEQ = " & TRANSACTION_SEQ & ", " & _
+                     "   GUI_ID = " & GUI_ID & ", " & _
+                     "   CALCULATE_FLAG = '" & CALCULATE_FLAG & "', " & _
+                     "   FATHER_NO = '" & FATHER_NO & "', " & _
+                     "   MOTHER_NO = '" & MOTHER_NO & "', " & _
+                     "   TOTAL_WEIGHT = " & TOTAL_WEIGHT & ", " & _
+                     "   TOTAL_ACTUAL_PRICE = " & TOTAL_ACTUAL_PRICE & ", " & _
+                     "   TOTAL_INCLUDE_PRICE = " & TOTAL_INCLUDE_PRICE & ", " & _
+                     "   BIRTH_DATE = '" & DateToStringInt(BIRTH_DATE) & "', " & _
+                     "   EXPENSE_TYPE = " & EXPENSE_TYPE & ", " & _
+                     "   PIG_STATUS = " & TempID1 & ", "
+            SQL1 = SQL1 & _
+                     "   REPLACE_FLAG = '" & REPLACE_FLAG & "', " & _
+                     "   ACTUAl_AMOUNT = " & ACTUAL_AMOUNT & ", " & _
+                     "   ACTUAL_PRICE = " & ACTUAL_PRICE & ", " & _
+                     "   INTAKE_TYPE = " & INTAKE_TYPE & ", " & _
+                     "   IMPORT_DESC = '" & ChangeQuote(Trim(IMPORT_DESC)) & "', " & _
+                    "    MODIFY_DATE = '" & ServerDateTime & "', " & _
+                    "    MODIFY_BY = " & glbUser.USER_ID & " " & _
+                     "WHERE IMPORT_ITEM_ID = " & IMPORT_ITEM_ID
+   End If
+   
+   If (AddEditMode = SHOW_ADD) Or (AddEditMode = SHOW_EDIT) Then
+      m_Conn.Execute (SQL1)
+   End If
+End Function
+
+Public Function AddEditDataExt()
+Dim ServerDateTime As String
+Dim SQL1 As String
+Dim ID As Long
+Dim ID2 As Long
+Dim TempID1 As String
+
+   TempID1 = PIG_STATUS
+   If PIG_STATUS <= 0 Then
+      TempID1 = "NULL"
+   End If
+   
+'   Call glbDatabaseMngr.GetServerDateTime(ServerDateTime, glbErrorLog)
+   
+   If AddEditMode = SHOW_ADD Then
+'      Call glbDatabaseMngr.GetSeqID("IMPORT_ITEM_SEQ", ID, glbErrorLog)
+'      Call glbDatabaseMngr.GetSeqID("TRANSACTION_SEQUENCE_SEQ", ID2, glbErrorLog)
+      ID = IMPORT_ITEM_ID
+      SQL1 = "INSERT INTO IMPORT_ITEM_EXT " & _
+                     "( " & _
+                     "   IMPORT_ITEM_ID, " & _
+                     "   INVENTORY_DOC_ID, " & _
+                     "   PART_ITEM_ID, " & _
+                     "   LOCATION_ID, " & _
+                     "   ACTUAL_UNIT_PRICE, " & _
+                     "   INCLUDE_UNIT_PRICE, " & _
+                     "   PREVIOUS_PRICE, " & _
+                     "   PREVIOUS_AMOUNT, " & _
+                     "   NEW_PRICE, " & _
+                     "   IMPORT_AMOUNT, " & _
+                     "   CURRENT_AMOUNT, "
+            SQL1 = SQL1 & _
+                     "   TRANSACTION_SEQ, " & _
+                     "   GUI_ID, " & _
+                     "   CALCULATE_FLAG, " & _
+                     "   FATHER_NO, " & _
+                     "   MOTHER_NO, " & _
+                     "   TOTAL_WEIGHT, " & _
+                     "   TOTAL_ACTUAL_PRICE, " & _
+                     "   TOTAL_INCLUDE_PRICE, "
+               SQL1 = SQL1 & _
+                     "   BIRTH_DATE, " & _
+                     "   EXPENSE_TYPE, " & _
+                     "   PIG_STATUS, " & _
+                     "   CREATE_DATE, " & _
+                    "    CREATE_BY, " & _
+                    "    MODIFY_DATE, " & _
+                    "    MODIFY_BY " & _
+                     ") " & _
+                     "VALUES " & _
+                     "( " & _
+                         ID & "," & _
+                         "" & INVENTORY_DOC_ID & "," & _
+                         "" & PART_ITEM_ID & "," & _
+                         "" & LOCATION_ID & "," & _
+                         "" & ACTUAL_UNIT_PRICE & "," & _
+                         "" & INCLUDE_UNIT_PRICE & "," & _
+                         "" & PREVIOUS_PRICE & "," & _
+                         "" & PREVIOUS_AMOUNT & "," & _
+                         "" & NEW_PRICE & ","
+               SQL1 = SQL1 & _
+                         "" & IMPORT_AMOUNT & "," & _
+                         "" & CURRENT_AMOUNT & "," & _
+                         "" & ID2 & "," & _
+                         "" & GUI_ID & "," & _
+                         "'" & CALCULATE_FLAG & "'," & _
+                         "'" & FATHER_NO & "'," & _
+                         "'" & MOTHER_NO & "'," & _
+                         "" & TOTAL_WEIGHT & "," & _
+                         "" & TOTAL_ACTUAL_PRICE & "," & _
+                         "" & TOTAL_INCLUDE_PRICE & "," & _
+                         "'" & DateToStringInt(BIRTH_DATE) & "'," & _
+                         "" & EXPENSE_TYPE & "," & _
+                         "" & TempID1 & "," & _
+                         "'" & ServerDateTime & "'," & _
+                         glbUser.USER_ID & "," & _
+                         "'" & ServerDateTime & "'," & _
+                         glbUser.USER_ID & _
+                     ") "
+         IMPORT_ITEM_ID = ID
+   Else 'Show edit
+'      Call glbDatabaseMngr.GetSeqID("TRANSACTION_SEQUENCE_SEQ", ID2, glbErrorLog)
+
+      SQL1 = "UPDATE IMPORT_ITEM SET " & _
+                     "   INVENTORY_DOC_ID = " & INVENTORY_DOC_ID & ", " & _
+                     "   PART_ITEM_ID = " & PART_ITEM_ID & ", " & _
+                     "   LOCATION_ID = " & LOCATION_ID & ", " & _
+                     "   ACTUAL_UNIT_PRICE = " & ACTUAL_UNIT_PRICE & ", " & _
+                     "   INCLUDE_UNIT_PRICE = " & INCLUDE_UNIT_PRICE & ", " & _
+                     "   PREVIOUS_PRICE = " & PREVIOUS_PRICE & ", " & _
+                     "   PREVIOUS_AMOUNT = " & PREVIOUS_AMOUNT & ", " & _
+                     "   NEW_PRICE = " & NEW_PRICE & ", " & _
+                     "   IMPORT_AMOUNT = " & IMPORT_AMOUNT & ", " & _
+                     "   CURRENT_AMOUNT = " & CURRENT_AMOUNT & ", " & _
+                     "   TRANSACTION_SEQ = " & TRANSACTION_SEQ & ", " & _
+                     "   GUI_ID = " & GUI_ID & ", " & _
+                     "   CALCULATE_FLAG = '" & CALCULATE_FLAG & "', " & _
+                     "   FATHER_NO = '" & FATHER_NO & "', " & _
+                     "   MOTHER_NO = '" & MOTHER_NO & "', " & _
+                     "   TOTAL_WEIGHT = " & TOTAL_WEIGHT & ", " & _
+                     "   TOTAL_ACTUAL_PRICE = " & TOTAL_ACTUAL_PRICE & ", " & _
+                     "   TOTAL_INCLUDE_PRICE = " & TOTAL_INCLUDE_PRICE & ", " & _
+                     "   BIRTH_DATE = '" & DateToStringInt(BIRTH_DATE) & "', " & _
+                     "   EXPENSE_TYPE = " & EXPENSE_TYPE & ", " & _
+                     "   PIG_STATUS = " & TempID1 & ", " & _
+                    "    MODIFY_DATE = '" & ServerDateTime & "', " & _
+                    "    MODIFY_BY = " & glbUser.USER_ID & " " & _
+                     "WHERE IMPORT_ITEM_ID = " & IMPORT_ITEM_ID
+   End If
+   
+   If (AddEditMode = SHOW_ADD) Or (AddEditMode = SHOW_EDIT) Then
+      m_Conn.Execute (SQL1)
+   End If
+End Function
+
+Public Function DeleteData()
+Dim SQL1 As String
+
+      SQL1 = "DELETE FROM LOSS_ITEM WHERE CAPITAL_LOSS_ID  IN (SELECT CAPITAL_LOSS_ID FROM CAPITAL_LOSS WHERE IMPORT_ITEM_ID = " & IMPORT_ITEM_ID & ") "
+      m_Conn.Execute (SQL1)
+      
+      SQL1 = "DELETE FROM CAPITAL_LOSS WHERE IMPORT_ITEM_ID = " & IMPORT_ITEM_ID
+      m_Conn.Execute (SQL1)
+
+      SQL1 = "DELETE FROM MOVEMENT_ITEM WHERE CAPITAL_MOVEMENT_ID  IN (SELECT CAPITAL_MOVEMENT_ID FROM CAPITAL_MOVEMENT WHERE IMPORT_ITEM_ID = " & IMPORT_ITEM_ID & ") "
+      m_Conn.Execute (SQL1)
+      
+      SQL1 = "DELETE FROM CAPITAL_MOVEMENT WHERE IMPORT_ITEM_ID = " & IMPORT_ITEM_ID
+      m_Conn.Execute (SQL1)
+
+      SQL1 = "DELETE FROM IMPORT_ITEM WHERE IMPORT_ITEM_ID = " & IMPORT_ITEM_ID
+      m_Conn.Execute (SQL1)
+End Function
+
+Public Function PatchDocDate() As Boolean
+Dim ServerDateTime As String
+Dim SQL1 As String
+
+   Call glbDatabaseMngr.GetServerDateTime(ServerDateTime, glbErrorLog)
+   
+   SQL1 = "UPDATE INVENTORY_DOC SET " & _
+                  "   DOCUMENT_DATE = '" & ChangeQuote(Trim(DateToStringInt(DOCUMENT_DATE))) & "', " & _
+                 "    MODIFY_DATE = '" & ServerDateTime & "', " & _
+                 "    MODIFY_BY = " & glbUser.USER_ID & " " & _
+                  "WHERE INVENTORY_DOC_ID = " & INVENTORY_DOC_ID
+                  
+   m_Conn.Execute (SQL1)
+End Function
+
+Public Function PatchTxSeq() As Boolean
+Dim ServerDateTime As String
+Dim SQL1 As String
+
+   Call glbDatabaseMngr.GetServerDateTime(ServerDateTime, glbErrorLog)
+   
+   SQL1 = "UPDATE IMPORT_ITEM SET " & _
+                  "   TRANSACTION_SEQ = " & TRANSACTION_SEQ & ", " & _
+                 "    MODIFY_DATE = '" & ServerDateTime & "', " & _
+                 "    MODIFY_BY = " & glbUser.USER_ID & " " & _
+                  "WHERE IMPORT_ITEM_ID = " & IMPORT_ITEM_ID
+                  
+   m_Conn.Execute (SQL1)
+End Function
+
+Public Function PatchPartItemID() As Boolean
+Dim ServerDateTime As String
+Dim SQL1 As String
+
+   Call glbDatabaseMngr.GetServerDateTime(ServerDateTime, glbErrorLog)
+   
+   SQL1 = "UPDATE IMPORT_ITEM SET " & _
+                  "   PART_ITEM_ID = " & PART_ITEM_ID & ", " & _
+                 "    MODIFY_DATE = '" & ServerDateTime & "', " & _
+                 "    MODIFY_BY = " & glbUser.USER_ID & " " & _
+                  "WHERE IMPORT_ITEM_ID = " & IMPORT_ITEM_ID
+                  
+   m_Conn.Execute (SQL1)
+End Function
+
+Public Function PatchAvgPrice(AvgPrice As Double, PrevAmount As Double, CurrentAmount As Double, NewPrice As Double, ImportAmount As Double, DocumentType As Long, TotalIncludePrice As Double) As Boolean
+Dim ServerDateTime As String
+Dim SQL1 As String
+
+   Call glbDatabaseMngr.GetServerDateTime(ServerDateTime, glbErrorLog)
+
+   If DocumentType = 3 Then
+      SQL1 = "UPDATE IMPORT_ITEM SET " & _
+                     "   ACTUAL_UNIT_PRICE = " & AvgPrice & ", " & _
+                     "   INCLUDE_UNIT_PRICE = " & AvgPrice & ", " & _
+                     "   TOTAL_INCLUDE_PRICE = " & TotalIncludePrice & ", " & _
+                     "   TOTAL_ACTUAL_PRICE = " & TotalIncludePrice & ", " & _
+                     "   PREVIOUS_AMOUNT = " & PrevAmount & ", " & _
+                     "   CURRENT_AMOUNT = " & CurrentAmount & ", " & _
+                     "   NEW_PRICE = " & NewPrice & ", " & _
+                    "    MODIFY_DATE = '" & ServerDateTime & "', " & _
+                    "    MODIFY_BY = " & glbUser.USER_ID & " " & _
+                     "WHERE IMPORT_ITEM_ID = " & IMPORT_ITEM_ID
+   ElseIf DocumentType = 4 Then
+      SQL1 = "UPDATE IMPORT_ITEM SET " & _
+                     "   IMPORT_AMOUNT = " & ImportAmount & ", " & _
+                     "   ACTUAL_UNIT_PRICE = " & AvgPrice & ", " & _
+                     "   INCLUDE_UNIT_PRICE = " & AvgPrice & ", " & _
+                     "   TOTAL_INCLUDE_PRICE = " & TotalIncludePrice & ", " & _
+                     "   TOTAL_ACTUAL_PRICE = " & TotalIncludePrice & ", " & _
+                    "    MODIFY_DATE = '" & ServerDateTime & "', " & _
+                    "    MODIFY_BY = " & glbUser.USER_ID & " " & _
+                     "WHERE IMPORT_ITEM_ID = " & IMPORT_ITEM_ID
+   Else
+      SQL1 = "UPDATE IMPORT_ITEM SET " & _
+                     "   PREVIOUS_AMOUNT = " & PrevAmount & ", " & _
+                     "   CURRENT_AMOUNT = " & CurrentAmount & ", " & _
+                     "   NEW_PRICE = " & NewPrice & ", " & _
+                    "    MODIFY_DATE = '" & ServerDateTime & "', " & _
+                    "    MODIFY_BY = " & glbUser.USER_ID & " " & _
+                     "WHERE IMPORT_ITEM_ID = " & IMPORT_ITEM_ID
+   End If
+   m_Conn.Execute (SQL1)
+End Function
+
+Private Sub Class_Terminate()
+   Set m_Import = Nothing
+End Sub

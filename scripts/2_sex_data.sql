@@ -1,0 +1,10 @@
+
+CREATE TABLE SEX_DATA
+(
+   SEX_ID                ID_TYPE NOT NULL,
+   SEX_NAME              CODE_TYPE NOT NULL,
+   CREATE_DATE           DATE_TYPE NOT NULL,
+   CREATE_BY             ID_TYPE NOT NULL,
+   MODIFY_DATE           DATE_TYPE NOT NULL,
+   MODIFY_BY             ID_TYPE NOT NULL
+);

@@ -1,0 +1,17 @@
+
+CREATE TABLE NAME
+(
+   NAME_ID              ID_TYPE NOT NULL,
+   PREFIX_ID            ID_TYPE NOT NULL,
+   LONG_NAME            LNAME_TYPE NOT NULL,
+   SHORT_NAME           SNAME_TYPE,
+   NICK_NAME            SNAME_TYPE,
+   MIDDLE_NAME          SNAME_TYPE,
+   LAST_NAME            LNAME_TYPE NOT NULL,
+   LANGUAGE_ID          ID_TYPE,
+   EMAIL                EMAIL_TYPE,
+   CREATE_DATE          DATE_TYPE NOT NULL,
+   CREATE_BY            ID_TYPE NOT NULL,
+   MODIFY_DATE          DATE_TYPE NOT NULL,
+   MODIFY_BY             ID_TYPE NOT NULL
+);

@@ -1,0 +1,19 @@
+
+CREATE TABLE JOB_PLAN
+(
+   JOB_PLAN_ID           ID_TYPE NOT NULL,
+   ACCOUNT_ID            ID_TYPE NOT NULL,
+   JOB_DATE              DATE_TYPE NOT NULL,
+   REQUEST_BY            ID_TYPE,
+   REQUEST_DATE          DATE_TYPE,
+   JOB_DESC              DESC_TYPE,
+   POST_STATUS           FLAG_TYPE,
+   FINISH_DATE           DATE_TYPE,
+   LOT_IMPORT_ID         ID_TYPE,
+   LOT_EXPORT_ID         ID_TYPE,
+
+   CREATE_DATE           DATE_TYPE NOT NULL,
+   CREATE_BY             ID_TYPE NOT NULL,
+   MODIFY_DATE           DATE_TYPE NOT NULL,
+   MODIFY_BY             ID_TYPE NOT NULL
+);

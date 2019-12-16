@@ -1,0 +1,11 @@
+CREATE TABLE YEAR_SEQ
+(
+   YEAR_SEQ_ID           ID_TYPE NOT NULL,
+   YEAR_NO               YEAR_TYPE NOT NULL UNIQUE,
+   YEAR_DESC             DESC_TYPE,
+
+   CREATE_DATE           DATE_TYPE NOT NULL,
+   CREATE_BY             ID_TYPE NOT NULL,
+   MODIFY_DATE           DATE_TYPE NOT NULL,
+   MODIFY_BY             ID_TYPE NOT NULL
+);

@@ -1,0 +1,10 @@
+
+CREATE TABLE WORK_STATUS
+(
+   WORK_ID               ID_TYPE NOT NULL,
+   WORK_NAME             CODE_TYPE NOT NULL,
+   CREATE_DATE           DATE_TYPE NOT NULL,
+   CREATE_BY             ID_TYPE NOT NULL,
+   MODIFY_DATE           DATE_TYPE NOT NULL,
+   MODIFY_BY             ID_TYPE NOT NULL
+);
