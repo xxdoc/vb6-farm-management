@@ -164,7 +164,7 @@ Private Sub Class_Initialize()
 End Sub
 
 'In this class we will not handle any error or any transaction
-Public Function QueryData(Ind As Long, Rs As ADODB.Recordset, ItemCount As Long)
+Public Function QueryData(Ind As Long, Rs As ADODB.Recordset, itemcount As Long)
 Dim SQL1 As String
 Dim SQL2 As String
 Dim SelectStr1 As String
@@ -583,7 +583,7 @@ Dim TempDate As String
    SQL1 = SelectStr1 & FromStr & WhereStr & OrderByStr & OrderTypeStr
    SQL2 = SelectStr2 & FromStr & WhereStr
    
-   Call glbDatabaseMngr.GetRs(SQL1, SQL2, True, ItemCount, Rs, glbErrorLog)
+   Call glbDatabaseMngr.GetRs(SQL1, SQL2, True, itemcount, Rs, glbErrorLog)
 End Function
 Public Function PopulateFromRS(Ind As Long, Rs As ADODB.Recordset)
    If Ind = 1 Then
@@ -1087,7 +1087,7 @@ Dim Cq As CCheque
 
    SQL1 = "DELETE FROM DO_ITEM WHERE DO_ID = " & BILLING_DOC_ID
    m_Conn.Execute (SQL1)
-
+   
    SQL1 = "DELETE FROM RO_ITEM WHERE BILLING_DOC_ID = " & BILLING_DOC_ID
    m_Conn.Execute (SQL1)
 

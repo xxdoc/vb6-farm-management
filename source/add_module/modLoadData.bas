@@ -11154,7 +11154,7 @@ Dim NewDate As Date
       I = 0
       C.AddItem ("")
    End If
-
+   
    If Not (Cl Is Nothing) Then
       Set Cl = Nothing
       Set Cl = New Collection

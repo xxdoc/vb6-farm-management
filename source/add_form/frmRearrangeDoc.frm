@@ -1,6 +1,6 @@
 VERSION 5.00
 Object = "{0BA686C6-F7D3-101A-993E-0000C0EF6F5E}#2.0#0"; "THREED20.OCX"
-Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.2#0"; "MSCOMCTL.OCX"
+Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "mscomctl.ocx"
 Begin VB.Form frmReArrangeDoc 
    BackColor       =   &H80000000&
    BorderStyle     =   1  'Fixed Single
@@ -632,6 +632,7 @@ Dim RecordCount As Double
 Dim O As Object
 Dim TempO As Object
 Dim InventoryBals As Collection
+Dim BalanceAccums As Collection
 Dim RName As String
 Dim cData As CPartLocation
 Dim I As Long
@@ -658,11 +659,11 @@ Dim TempEi As CExportItem
 Dim ExportTotalPrice As Double
 Dim NewDate As Date
 Dim Ba As CBalanceAccum
-Dim BalanceAccums As Collection
+
 Dim BatchID As Long
 Dim Ma As CMonthlyAccum
 Dim PartItemID As Long
-
+    
    If Not VerifyCombo(lblBatch, cboBatch, Not cboBatch.Enabled) Then
       Exit Sub
    End If

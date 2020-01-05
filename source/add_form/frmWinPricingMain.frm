@@ -1,6 +1,6 @@
 VERSION 5.00
 Object = "{0BA686C6-F7D3-101A-993E-0000C0EF6F5E}#2.0#0"; "THREED20.OCX"
-Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.2#0"; "mscomctl.ocx"
+Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "mscomctl.ocx"
 Begin VB.Form frmWinPricingMain 
    BorderStyle     =   1  'Fixed Single
    ClientHeight    =   8520
@@ -867,7 +867,7 @@ Dim Node As Node
 End Sub
 
 Private Sub InitFormLayout()
-   Call InitNormalLabel(lblUsername, MapText("ผู้ใช้ : "), RGB(0, 0, 255))
+   Call InitNormalLabel(lblUserName, MapText("ผู้ใช้ : "), RGB(0, 0, 255))
    Call InitNormalLabel(lblUserGroup, MapText("กลุ่มผู้ใช้ : "), RGB(0, 0, 255))
    Call InitNormalLabel(lblVersion, MapText("เวอร์ชัน : ") & glbParameterObj.Version & " (Interbase) ", RGB(0, 0, 255))
    Call InitNormalLabel(lblDateTime, "", RGB(0, 0, 255))
@@ -1421,7 +1421,7 @@ Dim Cm As CCapitalMovement
 Dim p As CPatch
 
    Set oMenu = New cPopupMenu
-   lMenuChosen = oMenu.Popup("เปลี่ยนรหัสผ่าน", "-", "นำเข้าข้อมูลยอดยกมา", "-", "แก้ไข จำนวน/มูลค่า วัตถุดิบ", "-", "ปรับปรุงราคาเฉลี่ย", "-", "สร้างข้อมูลการเคลื่อนไหวต้นทุน", "-", "ลบข้อมูลการเคลื่อนไหวต้นทุน", "-", "Export บิลขาย", "-", "Import บิลขาย", "-", "กำหนดช่วงวันที่เอกสาร", "-", "ตั้งยอดยกมาระบบใหม่(สุกร + วัตถุดิบ)", "-", "ตั้งยอดยกมาระบบใหม่(ลูกหนี้ + เงินสด)", "-", "คอนฟิคเลขที่เอกสาร", "-", "EXPORT ข้อมูลไปยัง ระบบรวมฟาร์ม", "-", "ตารางแก้ไขราคา", "-", "UPDATE ราคา", "-", "ย้ายข้อมูลตารางยอดคงเหลือไปไว้ในตารางสำรอง", "-", "ทดสอบข้อมูล", "-", "UPDATE ข้อมูลบิลที่จ่ายหมดแล้ว", "-", "แก้ไขรายงานตรงยอดขายสุกรฟาร์ม", "-", "ลบรายการในใบเสร็จรับเงิน", "-", "อัพเดดราคาบิลขายสุกร จาก Excel", "-", "ระบบตั้งค่าสิทธิ์อนุมัติใบสั่งซื้อ")
+   lMenuChosen = oMenu.Popup("เปลี่ยนรหัสผ่าน", "-", "นำเข้าข้อมูลยอดยกมา", "-", "แก้ไข จำนวน/มูลค่า วัตถุดิบ", "-", "ปรับปรุงราคาเฉลี่ย", "-", "สร้างข้อมูลการเคลื่อนไหวต้นทุน", "-", "ลบข้อมูลการเคลื่อนไหวต้นทุน", "-", "Export บิลขาย", "-", "Import บิลขาย", "-", "กำหนดช่วงวันที่เอกสาร", "-", "ตั้งยอดยกมาระบบใหม่(สุกร + วัตถุดิบ)", "-", "ตั้งยอดยกมาระบบใหม่(ลูกหนี้ + เงินสด)", "-", "คอนฟิคเลขที่เอกสาร", "-", "EXPORT ข้อมูลไปยัง ระบบรวมฟาร์ม", "-", "ตารางแก้ไขราคา", "-", "UPDATE ราคา", "-", "ย้ายข้อมูลตารางยอดคงเหลือไปไว้ในตารางสำรอง", "-", "ทดสอบข้อมูล", "-", "UPDATE ข้อมูลบิลที่จ่ายหมดแล้ว", "-", "แก้ไขรายงานตรงยอดขายสุกรฟาร์ม", "-", "ลบรายการในใบเสร็จรับเงิน", "-", "อัพเดดราคาบิลขายสุกร จาก Excel", "-", "ระบบตั้งค่าสิทธิ์อนุมัติใบสั่งซื้อ", "-", "ประมวลผลประจำปี")
    If lMenuChosen = 0 Then
       Exit Sub
    End If
@@ -1572,6 +1572,19 @@ Dim p As CPatch
 
       Unload frmAuthenPO
       Set frmAuthenPO = Nothing
+    ElseIf lMenuChosen = 45 Then
+      If Not VerifyAccessRight("PROGRAM_PROCESS-YEAR", "ประมวลผลประจำปี") Then
+         Call EnableForm(Me, True)
+         Exit Sub
+     End If
+    
+    frmProcessEndYear.HeaderText = "ประมวลผลประจำปี"
+    Load frmProcessEndYear
+    frmProcessEndYear.Show 1
+
+    Unload frmProcessEndYear
+    Set frmProcessEndYear = Nothing
+   
    End If
 End Sub
 
@@ -2154,10 +2167,10 @@ Private Sub Timer1_Timer()
    
    lblDateTime.Caption = "                                                    "
    lblDateTime.Caption = DateToStringExtEx3(Now)
-   lblUsername.Caption = MapText("ผู้ใช้ : ") & " " & glbUser.USER_NAME
+   lblUserName.Caption = MapText("ผู้ใช้ : ") & " " & glbUser.USER_NAME
    lblUserGroup.Caption = MapText("กลุ่มผู้ใช้ : ") & " " & glbUser.GROUP_NAME
    
-  Timer1.Enabled = True
+  'Timer1.Enabled = True
 End Sub
 Private Sub trvMain_NodeClick(ByVal Node As MSComctlLib.Node)
    If Node Is Nothing Then

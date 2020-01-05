@@ -114,7 +114,7 @@ Private Sub Class_Initialize()
 End Sub
 
 'In this class we will not handle any error or any transaction
-Public Function QueryData(Ind As Long, Rs As ADODB.Recordset, ItemCount As Long)
+Public Function QueryData(Ind As Long, Rs As ADODB.Recordset, itemcount As Long)
 Dim SQL1 As String
 Dim SQL2 As String
 Dim SelectStr1 As String
@@ -483,6 +483,15 @@ Dim MustCount As Boolean
       FromStr = FromStr & "LEFT OUTER JOIN LOCATION LC ON (II.LOCATION_ID = LC.LOCATION_ID) "
 
       WhereStr = ""
+      
+   ElseIf Ind = 100 Then   'LoadBalanceByImportExport
+      SelectStr1 = "SELECT II.PART_ITEM_ID, II.LOCATION_ID, SUM(II.IMPORT_AMOUNT) IMPORT_AMOUNT, SUM(II.TOTAL_INCLUDE_PRICE) TOTAL_INCLUDE_PRICE "
+      SelectStr2 = "SELECT COUNT(*)  "
+      
+      FromStr = "FROM IMPORT_ITEM II "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (II.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      
+      WhereStr = ""
    End If
    
    If IMPORT_ITEM_ID > 0 Then
@@ -797,6 +806,8 @@ Dim MustCount As Boolean
       GroupByStr = "GROUP BY IVD.YYYYMM2,II.INTAKE_TYPE "
    ElseIf Ind = 33 Then
       GroupByStr = "GROUP BY IVD.DOCUMENT_DATE,II.PART_ITEM_ID "
+   ElseIf Ind = 100 Then
+      GroupByStr = "GROUP BY II.PART_ITEM_ID,  II.LOCATION_ID "
    End If
    
    OrderByStr = ""
@@ -841,8 +852,6 @@ Dim MustCount As Boolean
      OrderByStr = "ORDER BY  SC.SUPPLIER_CODE ,IVD.DOCUMENT_DATE,IVD.DOCUMENT_NO,PI.PART_NO  "
       ElseIf OrderBy = 2 Then
         OrderByStr = "ORDER BY  IVD.DOCUMENT_DATE,IVD.DOCUMENT_NO,PI.PART_NO  "
-
-      
       End If
       
       
@@ -932,10 +941,10 @@ Dim MustCount As Boolean
    SQL1 = SelectStr1 & FromStr & WhereStr & GroupByStr & OrderByStr & OrderTypeStr
    SQL2 = SelectStr2 & FromStr & WhereStr
    
-   Call glbDatabaseMngr.GetRs(SQL1, SQL2, MustCount, ItemCount, Rs, glbErrorLog)
+   Call glbDatabaseMngr.GetRs(SQL1, SQL2, MustCount, itemcount, Rs, glbErrorLog)
 End Function
 
-Public Function QueryDataPatch(Ind As Long, Rs As ADODB.Recordset, ItemCount As Long)
+Public Function QueryDataPatch(Ind As Long, Rs As ADODB.Recordset, itemcount As Long)
 Dim SQL1 As String
 Dim SQL2 As String
 Dim SelectStr1 As String
@@ -1518,7 +1527,7 @@ Dim GroupByStr As String
    SQL1 = SelectStr1 & FromStr & WhereStr & GroupByStr & OrderByStr & OrderTypeStr
    SQL2 = SelectStr2 & FromStr & WhereStr
    
-   Call glbDatabaseMngr.GetRs(SQL1, SQL2, False, ItemCount, Rs, glbErrorLog)
+   Call glbDatabaseMngr.GetRs(SQL1, SQL2, False, itemcount, Rs, glbErrorLog)
 End Function
 
 Public Function CopyObject(O As CImportItem)
@@ -1839,6 +1848,11 @@ Public Function PopulateFromRS(Ind As Long, Rs As ADODB.Recordset)
       TOTAL_INCLUDE_PRICE = NVLD(Rs("TOTAL_INCLUDE_PRICE"), 0)
       TOTAL_ACTUAL_PRICE = NVLD(Rs("TOTAL_ACTUAL_PRICE"), 0)
       TOTAL_WEIGHT = NVLD(Rs("TOTAL_WEIGHT"), 0)
+   ElseIf Ind = 100 Then
+      PART_ITEM_ID = NVLI(Rs("PART_ITEM_ID"), 0)
+      LOCATION_ID = NVLI(Rs("LOCATION_ID"), 0)
+      IMPORT_AMOUNT = NVLD(Rs("IMPORT_AMOUNT"), 0)
+      TOTAL_INCLUDE_PRICE = NVLD(Rs("TOTAL_INCLUDE_PRICE"), 0)
    End If
 End Function
 Public Function AddEditData(Optional NewSeq As Boolean = True)
