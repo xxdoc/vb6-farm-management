@@ -1,8 +1,0 @@
-2019/12/14 23:34:29  Project name <prjFarmManagement> : Module name <clsDatabaseMngr> :Routine name <ConnectDatabase> : Local error message <Runtime error.> : System error message <SQLCODE=-902:
-Your user name and password are not defined. Ask your database administrator to set up a Firebird login.
-IBCODE=isc_login
->
-2019/12/14 23:34:40  Project name <prjFarmManagement> : Module name <clsDatabaseMngr> :Routine name <ConnectDatabase> : Local error message <Runtime error.> : System error message <SQLCODE=-902:
-Your user name and password are not defined. Ask your database administrator to set up a Firebird login.
-IBCODE=isc_login
->

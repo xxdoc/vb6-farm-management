@@ -776,8 +776,6 @@ Dim FoundFlag As Boolean
       End If
    Next R
    
-   VerifyAccessRight = True
-   
    If Not VerifyAccessRight Then
       VerifyAccessRight = False
       If Not msgType = 2 Then
@@ -3535,6 +3533,10 @@ Dim p As CPatch
    
    If Not p.IsPatch("2018_08_16_2_dear") Then '84
       Call p.Patch_2018_08_16_2_dear
+   End If
+   
+   If Not p.IsPatch("2020_01_20_1_jill") Then '85
+      Call p.Patch_2020_01_20_1_jill
    End If
    
    Set p = Nothing

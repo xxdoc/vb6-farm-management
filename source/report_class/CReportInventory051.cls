@@ -327,6 +327,11 @@ Dim HaveChange As Boolean
          I = I + 1
          HaveChange = False
          Call m_Details1.ClearField
+         
+         If Ba.PART_ITEM_ID = 16234 Then
+            Debug.Print
+         End If
+         
          Set Pi = m_PartItems(Trim(Str(Ba.PART_ITEM_ID)))
          Set Lc = m_Locations(Trim(Str(Ba.LOCATION_ID)))
          
@@ -420,7 +425,13 @@ Dim HaveChange As Boolean
       Vsp.FontBold = True
       Call Vsp.AddTable(strFormat, "", TempStr2)
       Vsp.FontBold = False
-
+   
+      If mcolParam("STKCARD_FLAG") = "Y" Then
+         Vsp = "ดึงยอดยกมาจากตารางปรับราคาเฉลี่ย"
+      Else
+         Vsp = "ดึงยอดยกมาจากตารางรวม"
+      End If
+      
       Set BodyCf = Nothing
    Vsp.EndDoc
    Call CloseExportFile(Vsp)

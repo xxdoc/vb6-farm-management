@@ -196,6 +196,7 @@ Dim CnAmount As Double
 Dim iCount As Long
 Dim TempX As Long
 Dim TempY As Long
+Dim TaxBranchString As String
 
    Vsp.FontBold = True
    Vsp.FontSize = 16
@@ -273,8 +274,8 @@ Dim TempY As Long
    Vsp.TableCell(tcCols) = 4
    Vsp.TableCell(tcRows) = 2
    Vsp.TableCell(tcRowHeight, 1) = 0.7 * 567
-   Vsp.TableCell(tcColWidth, 1, 1) = "4.7cm"
-   Vsp.TableCell(tcColWidth, 1, 2) = "7cm"
+   Vsp.TableCell(tcColWidth, 1, 1) = "4cm"
+   Vsp.TableCell(tcColWidth, 1, 2) = "7.7cm"
    Vsp.TableCell(tcColWidth, 1, 3) = "3.7cm"
    Vsp.TableCell(tcColWidth, 1, 4) = "3cm"
    Vsp.TableCell(tcFontSize) = 14
@@ -283,8 +284,18 @@ Dim TempY As Long
    Vsp.TableCell(tcAlign, 1, 1) = taLeftTop
    Vsp.TableCell(tcText, 1, 1) = "รหัสลูกค้า/Customer Code"
    
+   If Len(m_TempBD.TAX_ID) > 0 Then
+      TaxBranchString = " TAX ID : " & m_TempBD.TAX_ID
+   End If
+   If Len(m_TempBD.CUSTOMER_BRANCH) > 0 Then
+      TaxBranchString = TaxBranchString & " " & m_TempBD.CUSTOMER_BRANCH
+   End If
+   If Len(Trim(TaxBranchString)) > 0 Then
+      TaxBranchString = " (" & TaxBranchString & ")"
+   End If
+   
    Vsp.TableCell(tcAlign, 1, 2) = taLeftTop
-   Vsp.TableCell(tcText, 1, 2) = m_TempBD.CUSTOMER_CODE
+   Vsp.TableCell(tcText, 1, 2) = m_TempBD.CUSTOMER_CODE & TaxBranchString
    
     Vsp.TableCell(tcAlign, 1, 3) = taRightTop
     Vsp.TableCell(tcText, 1, 3) = "เลขที่เอกสาร/IV : "

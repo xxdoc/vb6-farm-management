@@ -1,0 +1,6 @@
+2020/01/28 12:05:30  Project name <prjFarmManagement> : Module name <clsDatabaseMngr> :Routine name <ConnectDatabase> : Local error message <Runtime error.> : System error message <SQLCODE=-902:
+I/O error for file "D:\DATABASE\GDB\MITTRAPHAP_DTS1.GDB"
+Error while trying to open file
+The system cannot find the file specified. 
+IBCODE=isc_io_error
+>

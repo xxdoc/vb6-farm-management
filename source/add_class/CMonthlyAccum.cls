@@ -118,6 +118,18 @@ Dim GroupByStr As String
       FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (CM.PART_ITEM_ID = PI.PART_ITEM_ID) "
       
       WhereStr = ""
+   ElseIf Ind = 100 Then
+      SelectStr1 = "SELECT CM1.* "
+      SelectStr2 = "SELECT COUNT(*)  "
+      
+      FromStr = "FROM MONTHLY_ACCUM CM1 "
+      FromStr = FromStr & "INNER JOIN "
+       FromStr = FromStr & " ( "
+       FromStr = FromStr & " SELECT CM2.PART_ITEM_ID,CM2.LOCATION_ID,MAX(CM2.DOCUMENT_DATE) DOCUMENT_DATE FROM MONTHLY_ACCUM CM2 "
+       FromStr = FromStr & "   WHERE CM2.DOCUMENT_DATE <= '" & DateToStringIntHi(TO_DATE1) & "' "
+       FromStr = FromStr & " GROUP BY CM2.PART_ITEM_ID,CM2.LOCATION_ID "
+       FromStr = FromStr & " ) "
+       FromStr = FromStr & " AS P ON (CM1.PART_ITEM_ID = P.PART_ITEM_ID AND CM1.LOCATION_ID = P.LOCATION_ID AND CM1.DOCUMENT_DATE = P.DOCUMENT_DATE) "
    End If
    
    If MONTHLY_ACCUM_ID > 0 Then
@@ -234,6 +246,8 @@ Dim GroupByStr As String
       OrderByStr = "ORDER BY PI.PART_NO, PI.PIG_TYPE "
    ElseIf Ind = 4 Then
       OrderByStr = "ORDER BY CM.PART_ITEM_ID ASC, CM.YYYYMM "
+   ElseIf Ind = 100 Then
+      OrderByStr = "ORDER BY CM1.MONTHLY_ACCUM_ID "
    End If
    
    If OrderType = 1 Then
@@ -304,6 +318,22 @@ Public Function PopulateFromRS(Ind As Long, Rs As ADODB.Recordset)
       ADJUST_OUT_AMOUNT = NVLD(Rs("ADJUST_OUT_AMOUNT"), 0)
       GL_IN = NVLD(Rs("GL_IN"), 0)
       GL_OUT = NVLD(Rs("GL_OUT"), 0)
+      BUY_AMOUNT = NVLD(Rs("BUY_AMOUNT"), 0)
+   ElseIf Ind = 100 Then
+      MONTHLY_ACCUM_ID = NVLI(Rs("MONTHLY_ACCUM_ID"), 0)
+      DOCUMENT_DATE = InternalDateToDate(NVLS(Rs("DOCUMENT_DATE"), ""))
+      PART_ITEM_ID = NVLI(Rs("PART_ITEM_ID"), 0)
+      IMPORT_AMOUNT = NVLD(Rs("IMPORT_AMOUNT"), 0)
+      EXPORT_AMOUNT = NVLD(Rs("EXPORT_AMOUNT"), 0)
+      BALANCE_AMOUNT1 = NVLD(Rs("BALANCE_AMOUNT1"), 0)
+      BALANCE_AMOUNT2 = NVLD(Rs("BALANCE_AMOUNT2"), 0)
+      LOCATION_ID = NVLI(Rs("LOCATION_ID"), 0)
+      SIMULATE_FLAG = NVLS(Rs("SIMULATE_FLAG"), "")
+      BATCH_ID = NVLI(Rs("BATCH_ID"), 0)
+      BIRTH_AMOUNT = NVLD(Rs("BIRTH_AMOUNT"), 0)
+      SELL_AMOUNT = NVLD(Rs("SELL_AMOUNT"), 0)
+      STATUS_IN_AMOUNT = NVLD(Rs("STATUS_IN_AMOUNT"), 0)
+      STATUS_OUT_AMOUNT = NVLD(Rs("STATUS_OUT_AMOUNT"), 0)
       BUY_AMOUNT = NVLD(Rs("BUY_AMOUNT"), 0)
    End If
 End Function

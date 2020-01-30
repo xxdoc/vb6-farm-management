@@ -1,0 +1,7 @@
+2020/01/27 15:08:03  Project name <prjFarmManagement> : Module name <frmReport> :Routine name <Form_Load> : Local error message <CReportInventory022> : System error message <This key is already associated with an element of this collection>
+2020/01/27 17:01:47  Project name <prjFarmManagement> : Module name <clsDatabaseMngr> :Routine name <ConnectDatabase> : Local error message <Runtime error.> : System error message <SQLCODE=-902:
+I/O error for file "D:\DATABASE\GDB\MITTRAPHAP_DTS2_BEFORE.GDB"
+Error while trying to open file
+The system cannot find the file specified. 
+IBCODE=isc_io_error
+>

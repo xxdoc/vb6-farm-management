@@ -231,7 +231,7 @@ End Sub
 
 Private Sub QueryData(Flag As Boolean)
 Dim IsOK As Boolean
-Dim ItemCount As Long
+Dim itemcount As Long
 
    If Flag Then
       Call EnableForm(Me, False)
@@ -314,9 +314,9 @@ Private Sub Form_Activate()
       Call LoadProductType(uctlPigTypeLookup.MyCombo, m_PigTypes)
       Set uctlPigTypeLookup.MyCollection = m_PigTypes
       
-      Call LoadLocation(uctlHouseLookup.MyCombo, m_Houses, 1)
+      Call LoadLocation(uctlHouseLookup.MyCombo, m_Houses, 1, "")
       Set uctlHouseLookup.MyCollection = m_Houses
-
+      
       If ShowMode = SHOW_EDIT Then
          Call QueryData(True)
       ElseIf ShowMode = SHOW_ADD Then

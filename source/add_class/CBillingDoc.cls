@@ -98,6 +98,9 @@ Public RUNNING_NO As Long
 Public CONFIG_DOC_TYPE As Long
 Public EMP_CODE As String
 
+Public TAX_ID As String
+Public CUSTOMER_BRANCH As String
+
 Public PKG_TYPE  As Long
 
 Public RECEIPT_DATE  As Date
@@ -181,7 +184,7 @@ Dim TempDate As String
    
    If Ind = 1 Then
       SelectStr1 = "SELECT BD.*, SNM.LONG_NAME SUPPLIER_NAME, SP.SUPPLIER_CODE, CM.CUSTOMER_CODE, CM.CUSTOMER_ID, CM.CREDIT, NM.LONG_NAME CUSTOMER_NAME, AC.ACCOUNT_NO, NULL RECEIPT_ITEM_ID, BB.BANK_ID, BK.BANK_NAME, BB.BBRANCH_NAME "
-      SelectStr1 = SelectStr1 & ",EM.EMP_CODE "
+      SelectStr1 = SelectStr1 & ",EM.EMP_CODE,CM.TAX_ID,CM.CUSTOMER_BRANCH "
       If ItemSumFlag Then
          If PriceSumFlag Then
             SelectStr1 = SelectStr1 & ", (SELECT SUM(DI.TOTAL_PRICE) FROM DO_ITEM DI WHERE (DI.DO_ID = BD.BILLING_DOC_ID) AND (DI.REVENUE_ID IS NOT NULL)) REVENUE_TOTAL_PRICE "
@@ -654,6 +657,9 @@ Public Function PopulateFromRS(Ind As Long, Rs As ADODB.Recordset)
       BILLING_DOC_ID = NVLD(Rs("BILLING_DOC_ID"), 0)
       
       TOTAL_SUM_WEIGHT = NVLD(Rs("TOTAL_SUM_WEIGHT"), 0)
+      
+      TAX_ID = NVLS(Rs("TAX_ID"), "")
+      CUSTOMER_BRANCH = NVLS(Rs("CUSTOMER_BRANCH"), "")
       
    ElseIf Ind = 2 Then
       ACCOUNT_ID = NVLI(Rs("ACCOUNT_ID"), -1)

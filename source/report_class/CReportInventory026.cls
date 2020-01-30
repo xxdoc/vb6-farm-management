@@ -327,7 +327,7 @@ Dim Ba As CBalanceAccum
 '   Call LoadPigHouseImportAmount(Nothing, ImportItems, -1, InternalDateToDate(DateToStringIntLow(NewDate)), CommitTypeToFlag(mcolParam("COMMIT_TYPE")))
 '   Call LoadPigHouseExportAmount(Nothing, ExportItems, -1, InternalDateToDate(DateToStringIntLow(NewDate)), CommitTypeToFlag(mcolParam("COMMIT_TYPE")))
    
-   Call LoadPigHouseImportAmount(Nothing, ImportItems, -1, mcolParam("FROM_DATE"), CommitTypeToFlag(mcolParam("COMMIT_TYPE")))
+  Call LoadPigHouseImportAmount(Nothing, ImportItems, -1, mcolParam("FROM_DATE"), CommitTypeToFlag(mcolParam("COMMIT_TYPE")))
    Call LoadPigHouseExportAmount(Nothing, ExportItems, -1, mcolParam("FROM_DATE"), CommitTypeToFlag(mcolParam("COMMIT_TYPE")))
    
    If Not initDoc Then Exit Function

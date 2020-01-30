@@ -63,6 +63,10 @@ Private m_YearSeqs As Collection
 Private m_ImportBals As Collection
 Private m_ExportBals As Collection
 
+
+Private PigSumEveryDay As Collection
+Private PigSumPeriodDay As Collection
+
 Private Sub Class_Initialize()
    Set mcolParam = New Collection
    Set m_TempCol = New Collection
@@ -78,6 +82,9 @@ Private Sub Class_Initialize()
    Set m_YearSeqs = New Collection
    Set m_ImportBals = New Collection
    Set m_ExportBals = New Collection
+   
+   Set PigSumEveryDay = New Collection
+   Set PigSumPeriodDay = New Collection
 End Sub
 
 Private Sub Class_Terminate()
@@ -97,6 +104,10 @@ Private Sub Class_Terminate()
    Set m_Details2 = Nothing
    Set m_ImportBals = Nothing
    Set m_ExportBals = Nothing
+   
+   Set PigSumEveryDay = Nothing
+   Set PigSumPeriodDay = Nothing
+   
 End Sub
 
 Private Function CReportInterface_AddParam(varItem As Variant, strIndex As String) As Boolean
@@ -361,7 +372,8 @@ Dim RejectAmt As Double
 Dim PigUsed As Collection
 Dim TodayPigUsed As Collection
 Dim AvgUsed As Double
-
+Dim TempBa As CBalanceAccum
+   
    RName = "genDoc"
 '-----------------------------------------------------------------------------------------------------
 '                                             Query Here
@@ -375,11 +387,11 @@ Dim AvgUsed As Double
    Set ExportItems = New Collection
    Call LoadPigExportAmount(Nothing, ExportItems, -1, mcolParam("TO_DATE"), CommitTypeToFlag(mcolParam("COMMIT_TYPE")), , , , , , mcolParam("HOUSE_GROUP_ID"))
    
-   Set ImportItemExs = New Collection
-   Call LoadPigImportAmount(Nothing, ImportItemExs, mcolParam("FROM_DATE"), mcolParam("TO_DATE"), CommitTypeToFlag(mcolParam("COMMIT_TYPE")))
+'   Set ImportItemExs = New Collection
+'   Call LoadPigImportAmount(Nothing, ImportItemExs, mcolParam("FROM_DATE"), mcolParam("TO_DATE"), CommitTypeToFlag(mcolParam("COMMIT_TYPE")))
    
-   Set ExportItemExs = New Collection
-   Call LoadPigExportAmount(Nothing, ExportItemExs, mcolParam("FROM_DATE"), mcolParam("TO_DATE"), CommitTypeToFlag(mcolParam("COMMIT_TYPE")))
+'   Set ExportItemExs = New Collection
+'   Call LoadPigExportAmount(Nothing, ExportItemExs, mcolParam("FROM_DATE"), mcolParam("TO_DATE"), CommitTypeToFlag(mcolParam("COMMIT_TYPE")))
    
    Set DeadPigs = New Collection
    If mcolParam("MODE") = 1 Then 'คิดตามเอกสารการโอน
@@ -419,6 +431,9 @@ Dim AvgUsed As Double
    Set TodayPigUsed = New Collection
    Call LoadPigPartUseAmount(Nothing, TodayPigUsed, mcolParam("TO_DATE"), mcolParam("TO_DATE"), CommitTypeToFlag(mcolParam("COMMIT_TYPE")), "Y", mcolParam("HOUSE_GROUP_ID"))
    
+   Call GenerateBalanceAccumSumEveryDay(PigSumEveryDay, -1, DateAdd("D", -1, mcolParam("FROM_DATE")), mcolParam("HOUSE_GROUP_ID"))
+   Call GenerateBalanceAccumSumDate(PigSumPeriodDay, mcolParam("FROM_DATE"), mcolParam("TO_DATE"), mcolParam("HOUSE_GROUP_ID"))
+   
    If Not initDoc Then
       Exit Function
    End If
@@ -446,19 +461,14 @@ Dim AvgUsed As Double
       For Each Pi In Partitems
          I = I + 1
          
-'         If Pi.PART_NO = "255201" Then
-'            ''debug.print
+'         If Pi.PART_ITEM_ID = 16554 Then
+'            Debug.Print
 '         End If
          
          Call m_Details1.ClearField
          Set EI = GetExportItem(ExportItems, Trim(Str(Pi.PART_ITEM_ID)))
          Set II = GetImportItem(ImportItems, Trim(Str(Pi.PART_ITEM_ID)))
          LeftAmt = II.IMPORT_AMOUNT - EI.EXPORT_AMOUNT
-                  
-         If (Pi.PART_NO = "254400") Then
-            Debug.Print
-         End If
-         
                   
          '===
 If Pi.AGE_CODE = "R" Then
@@ -499,13 +509,9 @@ End If
 '                  Debug.Print
 '               End If
             ElseIf j = 4 Then
-'               Set EI = GetExportItem(ExportItemExs, Trim(Str(Pi.PART_ITEM_ID)))
-'               Set II = GetImportItem(ImportItemExs, Trim(Str(Pi.PART_ITEM_ID)))
-'               Amt = II.IMPORT_AMOUNT - EI.EXPORT_AMOUNT
-'               If Pi.PART_NO = "255403" Or Pi.PART_NO = "255404" Then
-'                  ''debug.print
-'               End If
-               Amt = GenerateBalanceAmt(Pi.PART_ITEM_ID, mcolParam("FROM_DATE"), mcolParam("TO_DATE"), mcolParam("HOUSE_GROUP_ID"))
+'               Amt = GenerateBalanceAmtLocal(Pi.PART_ITEM_ID, mcolParam("FROM_DATE"), mcolParam("TO_DATE"))
+               
+               Amt = GenerateBalanceAmt(Pi.PART_ITEM_ID, mcolParam("FROM_DATE"), mcolParam("TO_DATE"), mcolParam("HOUSE_GROUP_ID"))             'ยกเลิกใช้เนื่องจาก Query ตลอดเวลา
                PigAmt = Amt
                
                TempStr = FormatNumber(Amt, , 0)
@@ -792,5 +798,37 @@ End Sub
 Private Sub VSP_StartDoc()
 'This event occur when VSPrinter.StartDoc is used and used to initialize some information before generating printed document
 End Sub
-
+Private Function GenerateBalanceAmtLocal(PartItemID As Long, FromDate As Date, ToDate As Date) As Double
+Dim TempSum As Double
+Dim Ba As CBalanceAccum
+Dim NewDate As Date
+Dim DaySum As Double
+   Set Ba = New CBalanceAccum
+   
+   NewDate = FromDate 'mcolParam("FROM_DATE")
+   
+'   If (PartItemID = 17318) Then
+'      Debug.Print
+'   End If
+   
+   Set Ba = GetBalanceAccum(PigSumEveryDay, Trim(Str(PartItemID)))
+   
+   DaySum = Ba.BALANCE_AMOUNT
+   While NewDate <= ToDate 'mcolParam("TO_DATE")
+      Set Ba = GetBalanceAccum(PigSumPeriodDay, Trim(PartItemID & "-" & NewDate))
+      
+      If (Ba.BALANCE_AMOUNT > 0) Then
+         Debug.Print
+      End If
+      
+      DaySum = DaySum + Ba.BALANCE_AMOUNT
+      TempSum = TempSum + DaySum
+      
+      NewDate = DateAdd("D", 1, NewDate)
+   Wend
+   
+   Set Ba = Nothing
+   
+   GenerateBalanceAmtLocal = TempSum
+End Function
 

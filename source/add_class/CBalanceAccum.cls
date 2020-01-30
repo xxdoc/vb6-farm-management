@@ -61,7 +61,7 @@ Private Sub Class_Initialize()
 End Sub
 
 'In this class we will not handle any error or any transaction
-Public Function QueryData(Ind As Long, Rs As ADODB.Recordset, ItemCount As Long)
+Public Function QueryData(Ind As Long, Rs As ADODB.Recordset, itemcount As Long)
 Dim SQL1 As String
 Dim SQL2 As String
 Dim SelectStr1 As String
@@ -348,7 +348,17 @@ Dim MustCount As Boolean
        FromStr = FromStr & " GROUP BY BA2.PART_ITEM_ID,BA2.LOCATION_ID "
        FromStr = FromStr & " ) "
        FromStr = FromStr & " AS P ON (BA1.PART_ITEM_ID = P.PART_ITEM_ID AND BA1.LOCATION_ID = P.LOCATION_ID AND BA1.DOCUMENT_DATE = P.DOCUMENT_DATE) "
-
+   
+   ElseIf Ind = 25 Then
+      SelectStr1 = "SELECT BA1.PART_ITEM_ID,BA1.DOCUMENT_DATE, SUM(IMPORT_AMOUNT-EXPORT_AMOUNT) BALANCE_AMOUNT "
+      SelectStr2 = "SELECT COUNT(*)  "
+      
+      FromStr = "FROM BALANCE_ACCUM BA1 "
+   ElseIf Ind = 26 Then
+      SelectStr1 = "SELECT BA1.PART_ITEM_ID, SUM(IMPORT_AMOUNT-EXPORT_AMOUNT) BALANCE_AMOUNT "
+      SelectStr2 = "SELECT COUNT(*)  "
+      
+      FromStr = "FROM BALANCE_ACCUM BA1 "
    End If
    
    If BALANCE_ACCUM_ID > 0 Then
@@ -529,6 +539,10 @@ Dim MustCount As Boolean
       GroupByStr = "GROUP BY BA1.PART_ITEM_ID, BA1.LOCATION_ID "
    ElseIf Ind = 24 Then
       GroupByStr = "GROUP BY PI.FEED_GROUP "
+   ElseIf Ind = 25 Then
+      GroupByStr = "GROUP BY BA1.PART_ITEM_ID, BA1.DOCUMENT_DATE "
+   ElseIf Ind = 26 Then
+      GroupByStr = "GROUP BY BA1.PART_ITEM_ID "
    End If
       
    OrderByStr = ""
@@ -579,7 +593,7 @@ Dim MustCount As Boolean
    SQL1 = SelectStr1 & FromStr & WhereStr & GroupByStr & OrderByStr & OrderTypeStr
    SQL2 = SelectStr2 & FromStr & WhereStr
    
-   Call glbDatabaseMngr.GetRs(SQL1, SQL2, MustCount, ItemCount, Rs, glbErrorLog)
+   Call glbDatabaseMngr.GetRs(SQL1, SQL2, MustCount, itemcount, Rs, glbErrorLog)
 End Function
 
 Public Function PopulateFromRS(Ind As Long, Rs As ADODB.Recordset)
@@ -710,6 +724,13 @@ Public Function PopulateFromRS(Ind As Long, Rs As ADODB.Recordset)
       BALANCE_AMOUNT = NVLD(Rs("BALANCE_AMOUNT"), 0)
       TOTAL_INCLUDE_PRICE = NVLD(Rs("TOTAL_INCLUDE_PRICE"), 0)
       AVG_PRICE = NVLD(Rs("AVG_PRICE"), 0)
+   ElseIf Ind = 25 Then
+      PART_ITEM_ID = NVLI(Rs("PART_ITEM_ID"), 0)
+      DOCUMENT_DATE = InternalDateToDate(NVLS(Rs("DOCUMENT_DATE"), ""))
+      BALANCE_AMOUNT = NVLD(Rs("BALANCE_AMOUNT"), 0)
+   ElseIf Ind = 26 Then
+      PART_ITEM_ID = NVLI(Rs("PART_ITEM_ID"), 0)
+      BALANCE_AMOUNT = NVLD(Rs("BALANCE_AMOUNT"), 0)
    End If
 End Function
 

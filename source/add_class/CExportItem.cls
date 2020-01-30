@@ -130,7 +130,7 @@ Private Sub Class_Initialize()
 '   EXP_DATE = -1
 End Sub
 'In this class we will not handle any error or any transaction
-Public Function QueryData(Ind As Long, Rs As ADODB.Recordset, ItemCount As Long)
+Public Function QueryData(Ind As Long, Rs As ADODB.Recordset, itemcount As Long)
 Dim SQL1 As String
 Dim SQL2 As String
 Dim SelectStr1 As String
@@ -308,7 +308,7 @@ Dim MustCount As Boolean
       FromStr = "FROM EXPORT_ITEM EI "
       FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (EI.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
       FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (EI.PART_ITEM_ID = PI.PART_ITEM_ID) "
-
+      
       WhereStr = "WHERE (PI.PIG_FLAG = 'N') "
       WhereStr = WhereStr & "AND (IVD.DOCUMENT_TYPE = 2) "
    ElseIf Ind = 8 Then
@@ -469,7 +469,7 @@ Dim MustCount As Boolean
    ElseIf Ind = 22 Then
       SelectStr1 = "SELECT EI.PART_ITEM_ID, SUM(EI.EXPORT_AMOUNT) EXPORT_AMOUNT "
       SelectStr2 = "SELECT COUNT(*)  "
-
+      
       FromStr = "FROM EXPORT_ITEM EI "
       FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (EI.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
       FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (EI.PART_ITEM_ID = PI.PART_ITEM_ID) "
@@ -700,7 +700,7 @@ Dim MustCount As Boolean
    ElseIf Ind = 42 Then
       SelectStr1 = "SELECT EI.PART_ITEM_ID, IVD.YYYYMM, SUM(EI.EXPORT_AMOUNT) EXPORT_AMOUNT, SUM(EI.EXPORT_TOTAL_PRICE) EXPORT_TOTAL_PRICE, SUM(EI.TOTAL_WEIGHT) TOTAL_WEIGHT "
       SelectStr2 = "SELECT COUNT(*)  "
-
+      
       FromStr = "FROM EXPORT_ITEM EI "
       FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (EI.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
       FromStr = FromStr & "LEFT OUTER JOIN PART_ITEM PI ON (EI.PART_ITEM_ID = PI.PART_ITEM_ID) "
@@ -995,7 +995,13 @@ Dim MustCount As Boolean
       FromStr = FromStr & "LEFT OUTER JOIN PRODUCT_STATUS PS ON (EI.PIG_STATUS = PS.PRODUCT_STATUS_ID) "
       
       WhereStr = ""
+   ElseIf Ind = 100 Then
+      SelectStr1 = "SELECT EI.PART_ITEM_ID, EI.LOCATION_ID, SUM(EI.EXPORT_AMOUNT) EXPORT_AMOUNT,SUM(EI.EXPORT_TOTAL_PRICE) EXPORT_TOTAL_PRICE "
+      SelectStr2 = "SELECT COUNT(*)  "
 
+      FromStr = "FROM EXPORT_ITEM EI "
+      FromStr = FromStr & "LEFT OUTER JOIN INVENTORY_DOC IVD ON (EI.INVENTORY_DOC_ID = IVD.INVENTORY_DOC_ID) "
+      
    End If
    
    If EXPORT_ITEM_ID > 0 Then
@@ -1456,8 +1462,10 @@ Dim MustCount As Boolean
       GroupByStr = "GROUP BY DOCUMENT_DATE, PI.PART_NO, PI.PART_DESC, PI.PART_ITEM_ID, HOUSE_ID, ENM.LONG_NAME, ENM.LAST_NAME, DOCUMENT_TYPE "
    ElseIf Ind = 64 Then
       GroupByStr = "GROUP BY IVD.DOCUMENT_DATE,EI.PART_ITEM_ID "
+   ElseIf Ind = 100 Then
+      GroupByStr = " GROUP BY EI.PART_ITEM_ID, EI.LOCATION_ID "
    End If
-
+   
    OrderByStr = ""
    OrderTypeStr = ""
    
@@ -1676,7 +1684,7 @@ Dim MustCount As Boolean
    SQL1 = SelectStr1 & FromStr & WhereStr & GroupByStr & OrderByStr & OrderTypeStr
    SQL2 = SelectStr2 & FromStr & WhereStr
    
-   Call glbDatabaseMngr.GetRs(SQL1, SQL2, MustCount, ItemCount, Rs, glbErrorLog)
+   Call glbDatabaseMngr.GetRs(SQL1, SQL2, MustCount, itemcount, Rs, glbErrorLog)
 End Function
 
 Public Function CopyObject(O As CExportItem)
@@ -2112,6 +2120,12 @@ Public Function PopulateFromRS(Ind As Long, Rs As ADODB.Recordset)
       DOCUMENT_DATE = InternalDateToDate(NVLS(Rs("DOCUMENT_DATE"), ""))
       PART_ITEM_ID = NVLI(Rs("PART_ITEM_ID"), -1)
       EXPORT_AMOUNT = NVLD(Rs("EXPORT_AMOUNT"), 0)
+   ElseIf Ind = 100 Then
+      PART_ITEM_ID = NVLI(Rs("PART_ITEM_ID"), -1)
+      LOCATION_ID = NVLI(Rs("LOCATION_ID"), -1)
+      
+      EXPORT_AMOUNT = NVLD(Rs("EXPORT_AMOUNT"), 0)
+      EXPORT_TOTAL_PRICE = NVLD(Rs("EXPORT_TOTAL_PRICE"), 0)
    End If
 End Function
 

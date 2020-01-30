@@ -13252,3 +13252,55 @@ ErrorHandler:
       glbErrorLog.ShowUserError
    End If
 End Function
+Public Function Patch_2020_01_20_1_jill() As Boolean
+On Error GoTo ErrorHandler
+Dim SQL As String
+Dim ServerDateTime As String
+Dim HasBegin As Boolean
+Dim VersionStr As String
+   
+   VersionStr = "2020_01_20_1_jill"
+   HasBegin = False
+   Call glbDatabaseMngr.GetServerDateTime(ServerDateTime, glbErrorLog)
+   
+   SQL = "ALTER TABLE CUSTOMER ADD CUSTOMER_BRANCH  DESC_TYPE "
+   m_Conn.Execute (SQL)
+   
+   m_Conn.BeginTrans
+   HasBegin = True
+   
+   SQL = "INSERT INTO PATCH_DELIVERY "
+   SQL = SQL & "( "
+   SQL = SQL & "PATCH_DELIVERY_ID, "
+   SQL = SQL & "PATCH_VERSION, "
+   SQL = SQL & "PATCH_DATE, "
+   SQL = SQL & "PATCH_BY "
+   SQL = SQL & ") VALUES "
+   SQL = SQL & "( "
+   SQL = SQL & "GEN_ID(PATCH_DELIVERY_SEQ, 1), "
+   SQL = SQL & "'" & VersionStr & "', "
+   SQL = SQL & "'" & ServerDateTime & "', "
+   SQL = SQL & "" & glbUser.USER_ID & " "
+   SQL = SQL & ")"
+   m_Conn.Execute (SQL)
+
+   m_Conn.CommitTrans
+   HasBegin = False
+
+   glbErrorLog.LocalErrorMsg = "Patch to version " & VersionStr & " done."
+   glbErrorLog.ShowUserError
+   
+   Patch_2020_01_20_1_jill = True
+   Exit Function
+
+ErrorHandler:
+      ''debug.print m_Conn.Errors(0)
+      glbErrorLog.LocalErrorMsg = "Patch to version " & VersionStr & " Error.1"
+      glbErrorLog.ShowUserError
+
+   If HasBegin Then
+      m_Conn.RollbackTrans
+      glbErrorLog.LocalErrorMsg = "Patch to version " & VersionStr & " Error.2"
+      glbErrorLog.ShowUserError
+   End If
+End Function

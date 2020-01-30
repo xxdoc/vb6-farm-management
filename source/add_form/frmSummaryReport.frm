@@ -4765,7 +4765,7 @@ Dim offset As Long
    Call LoadControl("C", cboGeneric(0).Width, True, "", 5, "ORDER_TYPE")
    Call LoadControl("L", lblGeneric(0).Width, True, MapText("เรียงจาก"))
    
-   Call LoadControl("CH", chkGeneric(0).Width, True, "ดึงยอดยกมาจาก stock card", , "STKCARD_FLAG")
+   Call LoadControl("CH", chkGeneric(0).Width, True, "ดึงยอดยกมาจากตารางปรับราคาเฉลี่ย", , "STKCARD_FLAG")
 
    Call ShowControl
    Call LoadComboData

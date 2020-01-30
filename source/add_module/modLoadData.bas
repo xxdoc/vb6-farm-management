@@ -7125,11 +7125,14 @@ Dim ToDate1 As String
    While Not Rs.EOF
       I = I + 1
       Set TempData = New CImportItem
+      
       Call TempData.PopulateFromRS(15, Rs)
-   
+      
       If Not (C Is Nothing) Then
       End If
-      
+            
+            
+            
       If Not (Cl Is Nothing) Then
          Call Cl.Add(TempData, Trim(Str(TempData.PART_ITEM_ID)))
       End If
@@ -7447,7 +7450,7 @@ Dim TempData As CExportItem
 Dim I As Long
 Dim FromDate1 As String
 Dim ToDate1 As String
-
+   
    Set D = New CExportItem
    Set Rs = New ADODB.Recordset
    
@@ -7944,7 +7947,11 @@ Dim I As Long
       I = I + 1
       Set TempData = New CExportItem
       Call TempData.PopulateFromRS(23, Rs)
-   
+      
+'      If TempData.PART_ITEM_ID = 16554 Then
+'         Debug.Print TempData.EXPORT_AMOUNT
+'      End If
+      
       If Not (C Is Nothing) Then
       End If
       
@@ -11256,6 +11263,11 @@ Dim NewDate As Date
       
       If Not (Cl Is Nothing) Then
          '''debug.print (TempData.LOCATION_ID & "-" & TempData.PART_ITEM_ID & "-" & TempData.BALANCE_AMOUNT)
+         
+'         If (TempData.PART_ITEM_ID = 16554) Then
+'            Debug.Print TempData.PART_ITEM_ID & "-" & TempData.LOCATION_ID & "-" & TempData.BALANCE_AMOUNT
+'         End If
+         
          Call Cl.Add(TempData, TempData.LOCATION_ID & "-" & TempData.PART_ITEM_ID)
       End If
       
@@ -17842,3 +17854,274 @@ ErrorHandler:
    glbErrorLog.SystemErrorMsg = Err.DESCRIPTION
    glbErrorLog.ShowErrorLog (LOG_FILE_MSGBOX)
 End Sub
+Public Sub LoadPigHouseImportAmount2(C As ComboBox, Optional Cl As Collection = Nothing, Optional FromDate As Date, Optional ToDate As Date, Optional CommitFlag As String = "", Optional LocationID As Long, Optional ParentFlag As String = "", Optional DocumentType As Long = -1, Optional ReplaceFlag As String = "", Optional BatchID As Long = -1)
+On Error GoTo ErrorHandler
+Dim D As CImportItem
+Dim itemcount As Long
+Dim Rs As ADODB.Recordset
+Dim TempData As CImportItem
+Dim I As Long
+Dim FromDate1 As String
+Dim ToDate1 As String
+
+   Set D = New CImportItem
+   Set Rs = New ADODB.Recordset
+   
+   D.FROM_DATE = FromDate
+   D.TO_DATE = ToDate
+   D.COMMIT_FLAG = CommitFlag
+   D.LOCATION_ID = LocationID
+   D.PARENT_FLAG = ParentFlag
+   D.DOCUMENT_TYPE = DocumentType
+   D.REPLACE_FLAG = ReplaceFlag
+   D.BATCH_ID = BatchID
+   D.OrderBy = 1
+   Call D.QueryData(100, Rs, itemcount)
+   
+   If Not (C Is Nothing) Then
+      C.Clear
+      I = 0
+      C.AddItem ("")
+   End If
+
+   If Not (Cl Is Nothing) Then
+      Set Cl = Nothing
+      Set Cl = New Collection
+   End If
+   While Not Rs.EOF
+      I = I + 1
+      Set TempData = New CImportItem
+      Call TempData.PopulateFromRS(100, Rs)
+   
+      If Not (C Is Nothing) Then
+      End If
+      
+      If TempData.PART_ITEM_ID = 16554 Then
+         Debug.Print
+      End If
+      
+      If Not (Cl Is Nothing) Then
+         Call Cl.Add(TempData, TempData.PART_ITEM_ID & "-" & TempData.LOCATION_ID)
+      End If
+   
+      Set TempData = Nothing
+      Rs.MoveNext
+   Wend
+   
+   Set Rs = Nothing
+   Set D = Nothing
+   Exit Sub
+   
+ErrorHandler:
+   glbErrorLog.SystemErrorMsg = Err.DESCRIPTION
+   glbErrorLog.ShowErrorLog (LOG_FILE_MSGBOX)
+End Sub
+Public Sub LoadPigHouseExportAmount2(C As ComboBox, Optional Cl As Collection = Nothing, Optional FromDate As Date, Optional ToDate As Date, Optional CommitFlag As String = "", Optional LocationID As Long = -1, Optional StatusID As Long = -1, Optional ParentFlag As String = "", Optional BatchID As Long = -1)
+On Error GoTo ErrorHandler
+Dim D As CExportItem
+Dim itemcount As Long
+Dim Rs As ADODB.Recordset
+Dim TempData As CExportItem
+Dim I As Long
+Dim FromDate1 As String
+Dim ToDate1 As String
+   
+   Set D = New CExportItem
+   Set Rs = New ADODB.Recordset
+   
+   D.FROM_DATE = FromDate
+   D.TO_DATE = ToDate
+   D.COMMIT_FLAG = CommitFlag
+   D.LOCATION_ID = LocationID
+   D.PIG_STATUS = StatusID
+   D.PARENT_FLAG = ParentFlag
+   D.BATCH_ID = BatchID
+   D.OrderBy = 1
+   Call D.QueryData(100, Rs, itemcount)
+   
+   If Not (C Is Nothing) Then
+      C.Clear
+      I = 0
+      C.AddItem ("")
+   End If
+   
+   If Not (Cl Is Nothing) Then
+      Set Cl = Nothing
+      Set Cl = New Collection
+   End If
+   While Not Rs.EOF
+      I = I + 1
+      Set TempData = New CExportItem
+      Call TempData.PopulateFromRS(100, Rs)
+      
+      If Not (C Is Nothing) Then
+      End If
+      
+'      If TempData.PART_ITEM_ID = 16554 Then
+'         Debug.Print TempData.PART_ITEM_ID & "-" & TempData.LOCATION_ID & "-" & TempData.EXPORT_AMOUNT
+'      End If
+      
+      If Not (Cl Is Nothing) Then
+         Call Cl.Add(TempData, TempData.PART_ITEM_ID & "-" & TempData.LOCATION_ID)
+      End If
+   
+      Set TempData = Nothing
+      Rs.MoveNext
+   Wend
+   
+   Set Rs = Nothing
+   Set D = Nothing
+   Exit Sub
+   
+ErrorHandler:
+   glbErrorLog.SystemErrorMsg = Err.DESCRIPTION
+   glbErrorLog.ShowErrorLog (LOG_FILE_MSGBOX)
+End Sub
+Public Sub LoadIMonthlyAccum(C As ComboBox, Optional Cl As Collection = Nothing, Optional ToDate As Date)
+On Error GoTo ErrorHandler
+Dim D As CMonthlyAccum
+Dim itemcount As Long
+Dim Rs As ADODB.Recordset
+Dim TempData As CMonthlyAccum
+Dim I As Long
+Dim FromDate1 As String
+Dim ToDate1 As String
+Dim NewDate As Date
+
+   Set D = New CMonthlyAccum
+   Set Rs = New ADODB.Recordset
+
+   D.FROM_DATE = -1
+   D.TO_DATE1 = ToDate
+   D.OrderBy = 1
+   Call D.QueryData(100, Rs, itemcount)
+   
+   If Not (C Is Nothing) Then
+      C.Clear
+      I = 0
+      C.AddItem ("")
+   End If
+
+   If Not (Cl Is Nothing) Then
+      Set Cl = Nothing
+      Set Cl = New Collection
+   End If
+   While Not Rs.EOF
+      I = I + 1
+      Set TempData = New CMonthlyAccum
+      Call TempData.PopulateFromRS(100, Rs)
+   
+      If Not (C Is Nothing) Then
+      End If
+      
+      If Not (Cl Is Nothing) Then
+         Call Cl.Add(TempData, TempData.LOCATION_ID & "-" & TempData.PART_ITEM_ID)
+      End If
+      
+      Set TempData = Nothing
+      Rs.MoveNext
+   Wend
+      
+   Set Rs = Nothing
+   Set D = Nothing
+   Exit Sub
+   
+ErrorHandler:
+   glbErrorLog.SystemErrorMsg = Err.DESCRIPTION
+   glbErrorLog.ShowErrorLog (LOG_FILE_MSGBOX)
+End Sub
+
+Public Sub GenerateBalanceAccumSumEveryDay(Cl As Collection, Optional FromDate As Date, Optional ToDate As Date, Optional HouseGroupID As Long = -1)
+On Error GoTo ErrorHandler
+Dim D As CBalanceAccum
+Dim itemcount As Long
+Dim Rs As ADODB.Recordset
+Dim TempData As CBalanceAccum
+Dim I As Long
+Dim FromDate1 As String
+Dim ToDate1 As String
+
+Dim tempCollSum As Collection
+   
+   Set tempCollSum = New Collection
+   
+   Set D = New CBalanceAccum
+   Set Rs = New ADODB.Recordset
+   
+   D.FROM_DATE = -1
+   D.TO_DATE = ToDate
+   D.HOUSE_GROUP_ID = HouseGroupID
+   D.OrderBy = 1
+   Call D.QueryData(26, Rs, itemcount)
+
+   If Not (Cl Is Nothing) Then
+      Set Cl = Nothing
+      Set Cl = New Collection
+   End If
+   While Not Rs.EOF
+      I = I + 1
+      Set TempData = New CBalanceAccum
+      Call TempData.PopulateFromRS(26, Rs)
+      
+      If Not (Cl Is Nothing) Then
+         Call Cl.Add(TempData, Trim(Str(TempData.PART_ITEM_ID)))
+      End If
+   
+      Set TempData = Nothing
+      Rs.MoveNext
+   Wend
+   
+   Set Rs = Nothing
+   Set D = Nothing
+   Set tempCollSum = Nothing
+   
+   Exit Sub
+   
+ErrorHandler:
+   glbErrorLog.SystemErrorMsg = Err.DESCRIPTION
+   glbErrorLog.ShowErrorLog (LOG_FILE_MSGBOX)
+End Sub
+Public Sub GenerateBalanceAccumSumDate(Cl As Collection, Optional FromDate As Date, Optional ToDate As Date, Optional HouseGroupID As Long = -1)
+On Error GoTo ErrorHandler
+Dim D As CBalanceAccum
+Dim itemcount As Long
+Dim Rs As ADODB.Recordset
+Dim TempData As CBalanceAccum
+Dim I As Long
+Dim FromDate1 As String
+Dim ToDate1 As String
+
+   Set D = New CBalanceAccum
+   Set Rs = New ADODB.Recordset
+   D.FROM_DATE = FromDate
+   D.TO_DATE = ToDate
+   D.HOUSE_GROUP_ID = HouseGroupID
+   D.OrderBy = 1
+   Call D.QueryData(25, Rs, itemcount)
+
+   If Not (Cl Is Nothing) Then
+      Set Cl = Nothing
+      Set Cl = New Collection
+   End If
+   While Not Rs.EOF
+      I = I + 1
+      Set TempData = New CBalanceAccum
+      Call TempData.PopulateFromRS(25, Rs)
+      
+      If Not (Cl Is Nothing) Then
+         Call Cl.Add(TempData, Trim(TempData.PART_ITEM_ID & "-" & TempData.DOCUMENT_DATE))
+      End If
+   
+      Set TempData = Nothing
+      Rs.MoveNext
+   Wend
+   
+   Set Rs = Nothing
+   Set D = Nothing
+   Exit Sub
+   
+ErrorHandler:
+   glbErrorLog.SystemErrorMsg = Err.DESCRIPTION
+   glbErrorLog.ShowErrorLog (LOG_FILE_MSGBOX)
+End Sub
+

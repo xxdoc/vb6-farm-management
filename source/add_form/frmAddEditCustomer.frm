@@ -2,7 +2,7 @@ VERSION 5.00
 Object = "{0BA686C6-F7D3-101A-993E-0000C0EF6F5E}#2.0#0"; "THREED20.OCX"
 Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "mscomctl.ocx"
 Object = "{E684D8A3-716C-4E59-AA94-7144C04B0074}#1.1#0"; "GridEX20.ocx"
-Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "comdlg32.ocx"
+Object = "{F9043C88-F6F2-101A-A3C9-08002B2F49FB}#1.2#0"; "COMDLG32.OCX"
 Begin VB.Form frmAddEditCustomer 
    ClientHeight    =   8490
    ClientLeft      =   60
@@ -109,9 +109,9 @@ Begin VB.Form frmAddEditCustomer
          Left            =   1860
          TabIndex        =   3
          Top             =   1530
-         Width           =   7005
-         _extentx        =   12356
-         _extenty        =   767
+         Width           =   3525
+         _ExtentX        =   12356
+         _ExtentY        =   767
       End
       Begin prjFarmManagement.uctlTextBox txtShortName 
          Height          =   435
@@ -119,8 +119,8 @@ Begin VB.Form frmAddEditCustomer
          TabIndex        =   0
          Top             =   1080
          Width           =   2835
-         _extentx        =   5001
-         _extenty        =   767
+         _ExtentX        =   5001
+         _ExtentY        =   767
       End
       Begin prjFarmManagement.uctlTextBox txtEmail 
          Height          =   435
@@ -128,8 +128,8 @@ Begin VB.Form frmAddEditCustomer
          TabIndex        =   5
          Top             =   1980
          Width           =   7005
-         _extentx        =   12356
-         _extenty        =   767
+         _ExtentX        =   12356
+         _ExtentY        =   767
       End
       Begin prjFarmManagement.uctlTextBox txtWebSite 
          Height          =   435
@@ -137,8 +137,8 @@ Begin VB.Form frmAddEditCustomer
          TabIndex        =   6
          Top             =   2430
          Width           =   9225
-         _extentx        =   16960
-         _extenty        =   767
+         _ExtentX        =   16960
+         _ExtentY        =   767
       End
       Begin prjFarmManagement.uctlTextBox txtBusinessDesc 
          Height          =   450
@@ -146,8 +146,8 @@ Begin VB.Form frmAddEditCustomer
          TabIndex        =   9
          Top             =   3330
          Width           =   4965
-         _extentx        =   8758
-         _extenty        =   794
+         _ExtentX        =   8758
+         _ExtentY        =   794
       End
       Begin prjFarmManagement.uctlTextBox txtCredit 
          Height          =   435
@@ -155,8 +155,8 @@ Begin VB.Form frmAddEditCustomer
          TabIndex        =   1
          Top             =   1080
          Width           =   795
-         _extentx        =   1402
-         _extenty        =   767
+         _ExtentX        =   1402
+         _ExtentY        =   767
       End
       Begin MSComDlg.CommonDialog dlgAdd 
          Left            =   0
@@ -171,8 +171,8 @@ Begin VB.Form frmAddEditCustomer
          TabIndex        =   2
          Top             =   1080
          Width           =   795
-         _extentx        =   1402
-         _extenty        =   767
+         _ExtentX        =   1402
+         _ExtentY        =   767
       End
       Begin GridEX20.GridEX GridEX1 
          Height          =   3015
@@ -229,10 +229,44 @@ Begin VB.Form frmAddEditCustomer
          Height          =   435
          Left            =   9870
          TabIndex        =   4
-         Top             =   1530
+         Top             =   1980
          Width           =   1125
-         _extentx        =   1402
-         _extenty        =   767
+         _ExtentX        =   1402
+         _ExtentY        =   767
+      End
+      Begin prjFarmManagement.uctlTextBox txtTaxID 
+         Height          =   435
+         Left            =   6240
+         TabIndex        =   36
+         Top             =   1530
+         Width           =   1995
+         _ExtentX        =   3519
+         _ExtentY        =   767
+      End
+      Begin prjFarmManagement.uctlTextBox txtCustomerBranch 
+         Height          =   435
+         Left            =   9600
+         TabIndex        =   37
+         Top             =   1530
+         Width           =   1635
+         _ExtentX        =   5001
+         _ExtentY        =   767
+      End
+      Begin VB.Label lblCustomerBranch 
+         Alignment       =   1  'Right Justify
+         Height          =   315
+         Left            =   8760
+         TabIndex        =   38
+         Top             =   1560
+         Width           =   735
+      End
+      Begin VB.Label lblTaxID 
+         Alignment       =   1  'Right Justify
+         Height          =   315
+         Left            =   5400
+         TabIndex        =   35
+         Top             =   1560
+         Width           =   735
       End
       Begin Threed.SSCheck chkKeyAccount 
          Height          =   435
@@ -269,14 +303,14 @@ Begin VB.Form frmAddEditCustomer
          Height          =   315
          Left            =   8910
          TabIndex        =   31
-         Top             =   1620
+         Top             =   2070
          Width           =   855
       End
       Begin VB.Label Label1 
          Height          =   315
          Left            =   11100
          TabIndex        =   30
-         Top             =   1590
+         Top             =   2070
          Width           =   495
       End
       Begin Threed.SSCommand cmdOK 
@@ -474,6 +508,9 @@ Dim itemcount As Long
       chkTakeAwayFlag.Value = FlagToCheck(m_Customer.TAKE_AWAY_FLAG)
       chkKeyAccount.Value = FlagToCheck(m_Customer.TAKE_KEY_ACCOUNT)
       
+      txtCustomerBranch.Text = m_Customer.CUSTOMER_BRANCH
+      txtTaxID.Text = m_Customer.TAX_ID
+      
       Dim Name As cName
       Dim CstName As CCustomerName
       If (Not m_Customer.CstNames Is Nothing) And (m_Customer.CstNames.Count > 0) Then
@@ -555,6 +592,9 @@ Dim IsOK As Boolean
    
    m_Customer.TAKE_AWAY_FLAG = Check2Flag(chkTakeAwayFlag.Value)
    m_Customer.TAKE_KEY_ACCOUNT = Check2Flag(chkKeyAccount.Value)
+   
+   m_Customer.CUSTOMER_BRANCH = txtCustomerBranch.Text
+   m_Customer.TAX_ID = txtTaxID.Text
    
    'Create Dummy account
    If m_Customer.CstAccounts.Count <= 0 Then
@@ -930,6 +970,8 @@ Private Sub InitFormLayout()
    Call InitNormalLabel(lblCreditAmount, MapText("วงเงิน"))
    Call InitNormalLabel(Label1, MapText("บาท"))
    Call InitNormalLabel(lblArea, MapText("เขตการขาย"))
+   Call InitNormalLabel(lblTaxID, MapText("TAX ID"))
+   Call InitNormalLabel(lblCustomerBranch, MapText("สาขา"))
    
    Call InitCombo(cboBusinessType)
    Call InitCombo(cboEnterpriseType)
@@ -1109,6 +1151,10 @@ Private Sub txtCreditAmount_Change()
    m_HasModify = True
 End Sub
 
+Private Sub txtCustomerBranch_Change()
+   m_HasModify = True
+End Sub
+
 Private Sub txtDiscountPercent_Change()
    m_HasModify = True
 End Sub
@@ -1133,6 +1179,10 @@ Private Sub txtPassword_Change()
    m_HasModify = True
 End Sub
 
+Private Sub txtTaxID_Change()
+   m_HasModify = True
+End Sub
+
 Private Sub txtWebSite_Change()
    m_HasModify = True
 End Sub
@@ -1142,7 +1192,7 @@ Private Sub uctlSetupDate_HasChange()
 End Sub
 
 Private Sub uctlTextBox1_Change()
-   m_HasModify = True
+
 End Sub
 Private Sub InitGrid2()
 Dim Col As JSColumn

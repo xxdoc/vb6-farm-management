@@ -1,0 +1,8 @@
+2020/01/21 10:02:53  Project name <prjFarmManagement> : Module name <clsDatabaseMngr> :Routine name <ConnectDatabase> : Local error message <Runtime error.> : System error message <SQLCODE=-902:
+I/O error for file "D:\DATABASE\GDB\MITTRAPHAP_DTS2.GDB"
+Error while trying to open file
+The system cannot find the file specified. 
+IBCODE=isc_io_error
+>
+2020/01/21 10:22:38  Project name <prjFarmManagement> : Module name <frmCustomer> :Routine name <UnboundReadData> : Local error message <> : System error message <Item cannot be found in the collection corresponding to the requested name or ordinal.>
+2020/01/21 10:22:46  Project name <prjFarmManagement> : Module name <frmCustomer> :Routine name <UnboundReadData> : Local error message <> : System error message <Item cannot be found in the collection corresponding to the requested name or ordinal.>

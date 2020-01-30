@@ -129,7 +129,7 @@ Dim Pi As CPartItem
 End Sub
 
 '===
-Public Function QueryYearSeq(Ua As CYearSeq, Rs As ADODB.Recordset, ItemCount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
+Public Function QueryYearSeq(Ua As CYearSeq, Rs As ADODB.Recordset, itemcount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
 On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL1 As String
@@ -148,7 +148,7 @@ Dim Exp As CXItem
    QueryYearSeq = False
 
    IsOK = True
-   Call Ua.QueryData(Rs, ItemCount)
+   Call Ua.QueryData(Rs, itemcount)
 
    If Ua.QueryFlag = 1 Then
       'Name ++++++++++++++++++++++++++
@@ -353,7 +353,7 @@ On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL As String
 Dim HasBegin As Boolean
-Dim ItemCount As Long
+Dim itemcount As Long
 Dim B As CYearSeq
 
    RName = "DeleteYearSeq"
@@ -401,7 +401,7 @@ ErrorHandler:
 End Function
 
 '===
-Public Function QueryPartItem(Ua As CPartItem, Rs As ADODB.Recordset, ItemCount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
+Public Function QueryPartItem(Ua As CPartItem, Rs As ADODB.Recordset, itemcount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
 On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL1 As String
@@ -419,7 +419,7 @@ Dim iCount As Long
    QueryPartItem = False
 
    IsOK = True
-   Call Ua.QueryData(1, Rs, ItemCount)
+   Call Ua.QueryData(1, Rs, itemcount)
 
    If Ua.QueryFlag = 1 Then
       Dim Yw As CPartLocation
@@ -463,7 +463,7 @@ On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL As String
 Dim HasBegin As Boolean
-Dim ItemCount As Long
+Dim itemcount As Long
 Dim B As CPartItem
 
    RName = "DeletePartItem"
@@ -649,7 +649,7 @@ ErrorHandler:
 End Function
 
 '==
-Public Function QueryEnterprise(Ua As CEnterprise, Rs As ADODB.Recordset, ItemCount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
+Public Function QueryEnterprise(Ua As CEnterprise, Rs As ADODB.Recordset, itemcount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
 On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL1 As String
@@ -667,7 +667,7 @@ Dim SubLen As Long
    
    IsOK = True
    
-   Call Ua.QueryData(Rs, ItemCount)
+   Call Ua.QueryData(Rs, itemcount)
    
    Dim bIsOk As Boolean
    Dim iCount As Long
@@ -899,7 +899,7 @@ ErrorHandler:
 End Function
 
 '==
-Public Function QueryCustomer(Ua As CCustomer, Rs As ADODB.Recordset, ItemCount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
+Public Function QueryCustomer(Ua As CCustomer, Rs As ADODB.Recordset, itemcount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
 On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL1 As String
@@ -916,7 +916,7 @@ Dim SubLen As Long
    QueryCustomer = False
    
    IsOK = True
-   Call Ua.QueryData2(Rs, ItemCount)
+   Call Ua.QueryData2(Rs, itemcount)
    
    Dim bIsOk As Boolean
    Dim iCount As Long
@@ -1232,7 +1232,7 @@ ErrorHandler:
 End Function
 
 '==
-Public Function QuerySupplier(Ua As CSupplier, Rs As ADODB.Recordset, ItemCount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
+Public Function QuerySupplier(Ua As CSupplier, Rs As ADODB.Recordset, itemcount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
 On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL1 As String
@@ -1249,7 +1249,7 @@ Dim SubLen As Long
    QuerySupplier = False
    
    IsOK = True
-   Call Ua.QueryData2(Rs, ItemCount)
+   Call Ua.QueryData2(Rs, itemcount)
    
    Dim bIsOk As Boolean
    Dim iCount As Long
@@ -1488,7 +1488,7 @@ ErrorHandler:
 End Function
 
 '==
-Public Function QueryEmployee(Ua As CEmployee, Rs As ADODB.Recordset, ItemCount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
+Public Function QueryEmployee(Ua As CEmployee, Rs As ADODB.Recordset, itemcount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
 On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL1 As String
@@ -1508,7 +1508,7 @@ Dim Qp As CEmployee
    QueryEmployee = False
 
    IsOK = True
-   Call Ua.QueryData(Rs, ItemCount)
+   Call Ua.QueryData(Rs, itemcount)
 
    If Ua.QueryFlag = 1 Then
       Set Ua.EmpName = Nothing
@@ -1546,7 +1546,7 @@ On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL As String
 Dim HasBegin As Boolean
-Dim ItemCount As Long
+Dim itemcount As Long
 
 Dim B As CEmployee
 
@@ -1644,7 +1644,7 @@ ErrorHandler:
 End Function
 
 '==
-Public Function QueryInventoryDoc(Ua As CInventoryDoc, Rs As ADODB.Recordset, ItemCount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
+Public Function QueryInventoryDoc(Ua As CInventoryDoc, Rs As ADODB.Recordset, itemcount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
 On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL1 As String
@@ -1662,7 +1662,7 @@ Dim iCount As Long
    QueryInventoryDoc = False
 
    IsOK = True
-   Call Ua.QueryData(Rs, ItemCount)
+   Call Ua.QueryData(Rs, itemcount)
 
    If Ua.QueryFlag = 1 Then
       Dim Yw As CImportItem
@@ -1736,7 +1736,7 @@ On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL As String
 Dim HasBegin As Boolean
-Dim ItemCount As Long
+Dim itemcount As Long
 Dim B As CInventoryDoc
 
    RName = "DeleteInventoryDoc"
@@ -2554,7 +2554,7 @@ Dim Pm As CPrtItemMap
 End Function
 
 '==
-Public Function QueryBillingDoc(Ua As CBillingDoc, Rs As ADODB.Recordset, ItemCount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
+Public Function QueryBillingDoc(Ua As CBillingDoc, Rs As ADODB.Recordset, itemcount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
 On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL1 As String
@@ -2572,7 +2572,7 @@ Dim iCount As Long
    QueryBillingDoc = False
 
    IsOK = True
-   Call Ua.QueryData(1, Rs, ItemCount)
+   Call Ua.QueryData(1, Rs, itemcount)
 
    If Ua.QueryFlag = 1 Then
       Dim Yw As CDoItem
@@ -2749,7 +2749,7 @@ ErrorHandler:
 
    QueryBillingDoc = False
 End Function
-Public Function QueryBillingDocFromNo(Ua As CBillingDoc, Rs As ADODB.Recordset, ItemCount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
+Public Function QueryBillingDocFromNo(Ua As CBillingDoc, Rs As ADODB.Recordset, itemcount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
 On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL1 As String
@@ -2767,7 +2767,7 @@ Dim iCount As Long
    QueryBillingDocFromNo = False
 
    IsOK = True
-   Call Ua.QueryData(1, Rs, ItemCount)
+   Call Ua.QueryData(1, Rs, itemcount)
 
    If Ua.QueryFlag = 1 Then
       Dim Yw As CDoItem
@@ -2891,7 +2891,7 @@ On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL As String
 Dim HasBegin As Boolean
-Dim ItemCount As Long
+Dim itemcount As Long
 Dim B As CBillingDoc
 
    RName = "DeleteBillingDoc"
@@ -2907,7 +2907,7 @@ Dim B As CBillingDoc
 
    B.BILLING_DOC_ID = UID
    B.PAYMENT_ID = PaymentID
-   Call B.QueryData(1, m_Rs1, ItemCount)
+   Call B.QueryData(1, m_Rs1, itemcount)
    
    If Not m_Rs1.EOF Then
       Call B.PopulateFromRS(1, m_Rs1)
@@ -4897,7 +4897,7 @@ Dim D As Object
 End Sub
 
 '===
-Public Function QueryLegacyH(Ua As CLegacy_h, Rs As ADODB.Recordset, ItemCount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
+Public Function QueryLegacyH(Ua As CLegacy_h, Rs As ADODB.Recordset, itemcount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
 On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL1 As String
@@ -4916,7 +4916,7 @@ Dim Exp As CXItem
    QueryLegacyH = False
 
    IsOK = True
-   Call Ua.QueryData(Rs, ItemCount)
+   Call Ua.QueryData(Rs, itemcount)
 
    If Ua.QueryFlag = 1 Then
       Dim Yw As CLegacy_d
@@ -5423,7 +5423,7 @@ ErrorHandler:
    AddEditManagementConfig = False
 End Function
 
-Public Function QueryReportConfig(Ua As CReportConfig, Rs As ADODB.Recordset, ItemCount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
+Public Function QueryReportConfig(Ua As CReportConfig, Rs As ADODB.Recordset, itemcount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
 On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL1 As String
@@ -5441,7 +5441,7 @@ Dim iCount As Long
    QueryReportConfig = False
 
    IsOK = True
-   Call Ua.QueryData(Rs, ItemCount)
+   Call Ua.QueryData(Rs, itemcount)
    
    QueryReportConfig = True
    Exit Function
@@ -5454,7 +5454,7 @@ ErrorHandler:
 
    QueryReportConfig = False
 End Function
-Public Function QueryMemoNote(Ua As CMemoNote, Rs As ADODB.Recordset, ItemCount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
+Public Function QueryMemoNote(Ua As CMemoNote, Rs As ADODB.Recordset, itemcount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
 On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL1 As String
@@ -5472,7 +5472,7 @@ Dim iCount As Long
    QueryMemoNote = False
 
    IsOK = True
-   Call Ua.QueryData(1, Rs, ItemCount)
+   Call Ua.QueryData(1, Rs, itemcount)
 
    If Ua.QueryFlag = 1 Then
       
@@ -5490,7 +5490,7 @@ ErrorHandler:
    QueryMemoNote = False
 End Function
 
-Public Function QueryManagementConfig(Ua As CManagementConfig, Rs As ADODB.Recordset, ItemCount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
+Public Function QueryManagementConfig(Ua As CManagementConfig, Rs As ADODB.Recordset, itemcount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
 On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL1 As String
@@ -5508,7 +5508,7 @@ Dim iCount As Long
    QueryManagementConfig = False
 
    IsOK = True
-   Call Ua.QueryData(Rs, ItemCount)
+   Call Ua.QueryData(Rs, itemcount)
    
    QueryManagementConfig = True
    Exit Function
@@ -6305,7 +6305,7 @@ On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL As String
 Dim HasBegin As Boolean
-Dim ItemCount As Long
+Dim itemcount As Long
 Dim B As CPayment
 
    RName = "DeletePayment"
@@ -6352,7 +6352,7 @@ ErrorHandler:
    DeletePayment = True
 End Function
 
-Public Function QueryPayment(Ua As CPayment, Rs As ADODB.Recordset, ItemCount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
+Public Function QueryPayment(Ua As CPayment, Rs As ADODB.Recordset, itemcount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
 On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL1 As String
@@ -6370,7 +6370,7 @@ Dim iCount As Long
    QueryPayment = False
 
    IsOK = True
-   Call Ua.QueryData(1, Rs, ItemCount)
+   Call Ua.QueryData(1, Rs, itemcount)
 
    If Ua.QueryFlag = 1 Then
       Dim Yw As CPaymentItem
@@ -6818,7 +6818,7 @@ Dim TempID As Long
    GetPreviousLocationID = TempID
 End Function
 
-Public Function QueryParameter(Ua As CParameter, Rs As ADODB.Recordset, ItemCount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
+Public Function QueryParameter(Ua As CParameter, Rs As ADODB.Recordset, itemcount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
 On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL1 As String
@@ -6838,7 +6838,7 @@ Dim bIsOk As Boolean
 
    IsOK = True
 
-   Call Ua.QueryData(1, Rs, ItemCount)
+   Call Ua.QueryData(1, Rs, itemcount)
    
    If Ua.QueryFlag = 1 Then
       Dim Gr As CUsedPrmItem
@@ -7462,7 +7462,7 @@ ErrorHandler:
    AddEditParameter = False
 End Function
 
-Public Function QueryBatch(Ua As CBatch, Rs As ADODB.Recordset, ItemCount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
+Public Function QueryBatch(Ua As CBatch, Rs As ADODB.Recordset, itemcount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
 On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL1 As String
@@ -7483,7 +7483,7 @@ Dim I As Long
 
    IsOK = True
 
-   Call Ua.QueryData(1, Rs, ItemCount)
+   Call Ua.QueryData(1, Rs, itemcount)
    
    If Ua.QueryFlag = 1 Then
       Dim Gr As CBatchItem
@@ -7703,7 +7703,7 @@ On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL As String
 Dim HasBegin As Boolean
-Dim ItemCount As Long
+Dim itemcount As Long
 
 Dim B As CPackage
 
@@ -7812,7 +7812,7 @@ ErrorHandler:
    AddEditPackage = False
 End Function
 
-Public Function QueryPackage(Ua As CPackage, Rs As ADODB.Recordset, ItemCount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
+Public Function QueryPackage(Ua As CPackage, Rs As ADODB.Recordset, itemcount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
 On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL1 As String
@@ -7830,7 +7830,7 @@ Dim iCount As Long
    QueryPackage = False
 
    IsOK = True
-   Call Ua.QueryData(1, Rs, ItemCount)
+   Call Ua.QueryData(1, Rs, itemcount)
 
    If Ua.QueryFlag = 1 Then
       Dim Yw As CPackageDetail
@@ -7879,7 +7879,7 @@ Dim RName As String
 Dim HasBegin As Boolean
 Dim iCount As Long
 Dim TempRs As ADODB.Recordset
-Dim ItemCount As Long
+Dim itemcount As Long
 
    RName = "CopyPackage"
    CopyPackage = False
@@ -7952,7 +7952,7 @@ Dim RName As String
 Dim HasBegin As Boolean
 Dim iCount As Long
 Dim TempRs As ADODB.Recordset
-Dim ItemCount As Long
+Dim itemcount As Long
 
    RName = "CopyParameter"
    CopyParameter = False
@@ -8259,7 +8259,7 @@ ErrorHandler:
 
    PatchBirthItemParam = False
 End Function
-Public Function QueryBatchParameter(Ua As CBatch, Rs As ADODB.Recordset, ItemCount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
+Public Function QueryBatchParameter(Ua As CBatch, Rs As ADODB.Recordset, itemcount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
 On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL1 As String
@@ -8281,7 +8281,7 @@ Dim TempBatchItemRs As ADODB.Recordset
 
    IsOK = True
 
-   Call Ua.QueryData(1, Rs, ItemCount)
+   Call Ua.QueryData(1, Rs, itemcount)
    
    If Ua.QueryFlag = 1 Then
       Dim Gr As CBatchItem
@@ -8327,7 +8327,7 @@ Dim TempBatchItemRs As ADODB.Recordset
          Set Pm = New CParameter
          Call Pm.SetFieldValue("PARAM_ID", Gr.GetFieldValue("PARAM_ID"))
          Pm.QueryFlag = 1
-         Call QueryParameter(Pm, TempBatchItemRs, ItemCount, IsOK, ErrorObj)
+         Call QueryParameter(Pm, TempBatchItemRs, itemcount, IsOK, ErrorObj)
          
          Call Pm.PopulateFromRS(1, TempBatchItemRs)
          
@@ -8398,7 +8398,7 @@ ErrorHandler:
    DeleteCashDoc = True
 End Function
 
-Public Function QueryCashDoc(Ua As CCashDoc, Rs As ADODB.Recordset, ItemCount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
+Public Function QueryCashDoc(Ua As CCashDoc, Rs As ADODB.Recordset, itemcount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
 On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL1 As String
@@ -8417,7 +8417,7 @@ Dim iCount As Long
 
    IsOK = True
 
-   Call Ua.QueryData(1, Rs, ItemCount)
+   Call Ua.QueryData(1, Rs, itemcount)
    
    If Ua.QueryFlag = 1 Then
 '      Dim Ji As CJournalItem
@@ -8729,7 +8729,7 @@ Dim ExportCount As Long
       Set Ti = Nothing
    Next I
 End Sub
-Public Function QueryCheque(Ua As CCheque, Rs As ADODB.Recordset, ItemCount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
+Public Function QueryCheque(Ua As CCheque, Rs As ADODB.Recordset, itemcount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
 On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL1 As String
@@ -8747,7 +8747,7 @@ Dim SubLen As Long
 
    IsOK = True
 
-   Call Ua.QueryData(1, Rs, ItemCount)
+   Call Ua.QueryData(1, Rs, itemcount)
 
    QueryCheque = True
    Exit Function
@@ -8903,7 +8903,7 @@ ErrorHandler:
    IsOK = False
    PatchBAPigAge = False
 End Function
-Public Function QueryCustomerInfo(Ua As CCustomer, Rs As ADODB.Recordset, ItemCount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
+Public Function QueryCustomerInfo(Ua As CCustomer, Rs As ADODB.Recordset, itemcount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
 On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL1 As String
@@ -8920,7 +8920,7 @@ Dim SubLen As Long
    QueryCustomerInfo = False
 
    IsOK = True
-   Call Ua.QueryData1(Rs, ItemCount)
+   Call Ua.QueryData1(Rs, itemcount)
          
    QueryCustomerInfo = True
    Exit Function
@@ -8978,7 +8978,7 @@ ErrorHandler:
    DeleteRevenueCost = True
 End Function
 
-Public Function QueryRevenueCost(Ua As CRevenueCost, Rs As ADODB.Recordset, ItemCount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
+Public Function QueryRevenueCost(Ua As CRevenueCost, Rs As ADODB.Recordset, itemcount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
 On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL1 As String
@@ -8997,7 +8997,7 @@ Dim iCount As Long
 
    IsOK = True
 
-   Call Ua.QueryData(1, Rs, ItemCount)
+   Call Ua.QueryData(1, Rs, itemcount)
    
    If Ua.QueryFlag = 1 Then
       Dim Ji As CRevenueCostItem
@@ -9093,7 +9093,7 @@ Dim RName As String
 Dim HasBegin As Boolean
 Dim iCount As Long
 Dim TempRs As ADODB.Recordset
-Dim ItemCount As Long
+Dim itemcount As Long
 
    RName = "CopyBatch"
    CopyBatch = False
@@ -9217,7 +9217,7 @@ Dim Bi As CBatchItem
       Call B.BatchItems.Add(Bi)
    Next Bi
 End Sub
-Public Function QueryPriceAdjust(Ua As CPriceAdjust, Rs As ADODB.Recordset, ItemCount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
+Public Function QueryPriceAdjust(Ua As CPriceAdjust, Rs As ADODB.Recordset, itemcount As Long, IsOK As Boolean, ErrorObj As clsErrorLog) As Boolean
 On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL1 As String
@@ -9235,7 +9235,7 @@ Dim iCount As Long
    QueryPriceAdjust = False
 
    IsOK = True
-   Call Ua.QueryData(1, Rs, ItemCount)
+   Call Ua.QueryData(1, Rs, itemcount)
 
    If Ua.QueryFlag = 1 Then
       
@@ -9258,7 +9258,7 @@ On Error GoTo ErrorHandler
 Dim RName As String
 Dim SQL As String
 Dim HasBegin As Boolean
-Dim ItemCount As Long
+Dim itemcount As Long
 
 Dim B As CPriceAdjust
 

@@ -38,6 +38,7 @@ Public NORMAL_DISCOUNT As Double
 Public RESPONSE_BY As Long
 Public CREDIT_AMOUNT As Double
 Public REGION_ID As Long
+Public CUSTOMER_BRANCH As String
 
 Public FROM_DATE As Date
 Public TO_DATE As Date
@@ -612,7 +613,7 @@ Public Function PopulateFromRS(Ind As Long, Rs As ADODB.Recordset)
    RESPONSE_BY = NVLI(Rs("RESPONSE_BY"), 0)
    CREDIT_AMOUNT = NVLD(Rs("CREDIT_AMOUNT"), 0)
    REGION_ID = NVLI(Rs("REGION_ID"), 0)
-   
+   CUSTOMER_BRANCH = NVLS(Rs("CUSTOMER_BRANCH"), "")
    
    TAKE_AWAY_FLAG = NVLS(Rs("TAKE_AWAY_FLAG"), "")
    TAKE_KEY_ACCOUNT = NVLS(Rs("TAKE_KEY_ACCOUNT"), "")
@@ -641,6 +642,7 @@ Public Function PopulateFromRSInfo(Ind As Long, Rs As ADODB.Recordset)
    RESPONSE_BY = NVLI(Rs("RESPONSE_BY"), 0)
    CREDIT_AMOUNT = NVLD(Rs("CREDIT_AMOUNT"), 0)
    REGION_ID = NVLI(Rs("REGION_ID"), 0)
+   CUSTOMER_BRANCH = NVLS(Rs("CUSTOMER_BRANCH"), "")
    
    TAKE_AWAY_FLAG = NVLS(Rs("TAKE_AWAY_FLAG"), "")
    TAKE_KEY_ACCOUNT = NVLS(Rs("TAKE_KEY_ACCOUNT"), "")
@@ -733,6 +735,7 @@ Dim TempID5 As String
                   SQL1 = SQL1 & _
                      "   TAKE_AWAY_FLAG, " & _
                      "   TAKE_KEY_ACCOUNT, " & _
+                     "   CUSTOMER_BRANCH, " & _
                      "   CREATE_DATE, " & _
                     "    CREATE_BY, " & _
                     "    MODIFY_DATE, " & _
@@ -758,6 +761,7 @@ Dim TempID5 As String
                          "" & TempID5 & "," & _
                          "'" & ChangeQuote(Trim(TAKE_AWAY_FLAG)) & "'," & _
                         "'" & ChangeQuote(Trim(TAKE_KEY_ACCOUNT)) & "'," & _
+                        "'" & ChangeQuote(Trim(CUSTOMER_BRANCH)) & "'," & _
                          "'" & ServerDateTime & "'," & _
                          glbUser.USER_ID & "," & _
                          "'" & ServerDateTime & "'," & _
@@ -783,6 +787,7 @@ Dim TempID5 As String
                      "   REGION_ID = " & TempID5 & ", " & _
                     "   TAKE_AWAY_FLAG = '" & ChangeQuote(Trim(TAKE_AWAY_FLAG)) & "', " & _
                      "   TAKE_KEY_ACCOUNT = '" & ChangeQuote(Trim(TAKE_KEY_ACCOUNT)) & "', " & _
+                     "   CUSTOMER_BRANCH = '" & ChangeQuote(Trim(CUSTOMER_BRANCH)) & "', " & _
                      "    MODIFY_DATE = '" & ServerDateTime & "', " & _
                     "    MODIFY_BY = " & glbUser.USER_ID & " " & _
                      "WHERE CUSTOMER_ID = " & CUSTOMER_ID

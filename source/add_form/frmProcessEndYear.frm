@@ -4,7 +4,7 @@ Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "mscomctl.ocx"
 Begin VB.Form frmProcessEndYear 
    BackColor       =   &H80000000&
    BorderStyle     =   1  'Fixed Single
-   ClientHeight    =   6495
+   ClientHeight    =   7710
    ClientLeft      =   45
    ClientTop       =   330
    ClientWidth     =   11910
@@ -13,17 +13,17 @@ Begin VB.Form frmProcessEndYear
    LinkTopic       =   "Form1"
    MaxButton       =   0   'False
    MinButton       =   0   'False
-   ScaleHeight     =   6495
+   ScaleHeight     =   7710
    ScaleWidth      =   11910
    StartUpPosition =   1  'CenterOwner
    Begin Threed.SSFrame SSFrame1 
-      Height          =   6555
+      Height          =   7755
       Left            =   -120
       TabIndex        =   5
       Top             =   0
       Width           =   12195
       _ExtentX        =   21511
-      _ExtentY        =   11562
+      _ExtentY        =   13679
       _Version        =   131073
       PictureBackgroundStyle=   2
       Begin MSComctlLib.ProgressBar prgProgress 
@@ -66,6 +66,19 @@ Begin VB.Form frmProcessEndYear
          _ExtentX        =   6800
          _ExtentY        =   714
       End
+      Begin Threed.SSCommand cmdUpdateFK 
+         Height          =   525
+         Left            =   4080
+         TabIndex        =   13
+         Top             =   6960
+         Width           =   4095
+         _ExtentX        =   7223
+         _ExtentY        =   926
+         _Version        =   131073
+         MousePointer    =   99
+         MouseIcon       =   "frmProcessEndYear.frx":27A2
+         ButtonStyle     =   3
+      End
       Begin VB.Label lblNote 
          Caption         =   "Label1"
          Height          =   2835
@@ -101,7 +114,7 @@ Begin VB.Form frmProcessEndYear
          _ExtentY        =   926
          _Version        =   131073
          MousePointer    =   99
-         MouseIcon       =   "frmProcessEndYear.frx":27A2
+         MouseIcon       =   "frmProcessEndYear.frx":2ABC
          ButtonStyle     =   3
       End
       Begin VB.Label Label1 
@@ -193,6 +206,39 @@ Dim IsOK As Boolean
    Exit Sub
    
 End Sub
+
+Private Sub cmdUpdateFK_Click()
+Dim Status As Boolean
+Dim IsOK As Boolean
+
+   Me.Enabled = False
+   
+   Status = AdjustFK
+   
+   Me.Enabled = True
+   
+   If Status Then
+      'If ConfirmSave Then
+         'Call glbDaily.CommitTransaction
+         glbErrorLog.LocalErrorMsg = "การอัฟเดดเสร็จสมบูรณ์"
+         glbErrorLog.ShowUserError
+'      Else
+'         Call glbDaily.RollbackTransaction
+'         glbErrorLog.LocalErrorMsg = "การอัฟเดด ERROR"
+'         glbErrorLog.ShowUserError
+'      End If
+   Else
+'      Call glbDaily.RollbackTransaction
+      glbErrorLog.LocalErrorMsg = "การอัฟเดด ERROR"
+      glbErrorLog.ShowUserError
+   End If
+   
+   OKClick = True
+   Unload Me
+   Exit Sub
+
+End Sub
+
 Private Sub Form_Activate()
       Me.Refresh
       DoEvents
@@ -229,7 +275,7 @@ Private Sub InitFormLayout()
    Call InitNormalLabel(Label1, "%")
    
    Call InitNormalLabel(lblProgressDesc, "กรอกวันที่ จากนั้น กดเริ่ม")
-   Call InitNormalLabel(lblNote, "ทำเสร็จวันที่ 07/01/2563 Test เรียบร้อย เริ่มใช้งาน จันทร์ 13/01/2563 จะใช้งาน เริ่มตั้งแต่  ถึงวันที่ 31/12/2559" & vbCrLf & "โดยการประมวลผลสิ้นปีนี้มีเงื่อนไขดังนี้" & vbCrLf & "1.ควร COPY ออกมา Test ในเครื่อง StandAlone ก่อน" & vbCrLf & "2.BACKUP / ตรวจสอบยอดหนี้ Stock ก่อนหลังการประมวลผล")
+   Call InitNormalLabel(lblNote, "เริ่มใช้งาน จันทร์ 26/01/2563 จะใช้งาน เริ่มตั้งแต่  ถึงวันที่ 31/12/2561 (เก็บไว้ 1 ปี)" & vbCrLf & "โดยการประมวลผลสิ้นปีนี้มีเงื่อนไขดังนี้" & vbCrLf & "1.ควร COPY ออกมา Test ในเครื่อง StandAlone ก่อน" & vbCrLf & "2.BACKUP / ตรวจสอบยอดหนี้ Stock ก่อนหลังการประมวลผล" & vbCrLf & "3.ควรทำหลังจากปิดงบซึ่งประมาณ กลางเดือน 1" & vbCrLf & "4.สำคัญคือ หลังจากเสร็จแล้ว ให้ออกจากโปรแกรมก่อน แล้วกลับมา Update FK ใหม่ด้วย")
    
    Call txtPercent.SetTextLenType(TEXT_FLOAT, glbSetting.MONEY_TYPE)
    txtPercent.Enabled = False
@@ -239,6 +285,8 @@ Private Sub InitFormLayout()
    
    Call InitMainButton(cmdExit, MapText("ยกเลิก (ESC)"))
    Call InitMainButton(cmdStart, MapText("เริ่ม"))
+   
+   Call InitMainButton(cmdUpdateFK, MapText("Update FK กลับเหมือนเดิม"))
    
    Call ResetStatus
 End Sub
@@ -260,21 +308,32 @@ Dim I As Long
 Dim IsOK As Boolean
 
 Dim BalanceBeforeAdjustColl As Collection
-Dim BalanceAferAdjustColl As Collection
+Dim MonthlyBeforeAdjustColl As Collection
+Dim ImportAfterAdjustColl As Collection
+Dim ExportAfterAdjustColl As Collection
 
 Dim TempDate As String
 Dim SQL1 As String
 
 Dim Ivd As CInventoryDoc
 
-Dim tempBalance As CBalanceAccum
+Dim TempBalance As CBalanceAccum
+Dim TempNewBalance As CBalanceAccum
+Dim TempMonthly As CMonthlyAccum
+
 Dim tempBalanceAfter As CBalanceAccum
 Dim Amt As Double
-Dim tempImport As CImportItem
-Dim tempExport As CExportItem
+
+Dim MBa As CMonthlyAccum
+
+Dim TempImport As CImportItem
+Dim TempExport As CExportItem
    
    Set BalanceBeforeAdjustColl = New Collection
-   Set BalanceAferAdjustColl = New Collection
+   Set MonthlyBeforeAdjustColl = New Collection
+   Set ImportAfterAdjustColl = New Collection
+   Set ExportAfterAdjustColl = New Collection
+   
    
    I = 0
    prgProgress.MIN = 0
@@ -287,105 +346,13 @@ Dim tempExport As CExportItem
    'Load ยกมา จาก Balance Accum
    Call LoadInventoryBalanceEx(Nothing, BalanceBeforeAdjustColl, DateAdd("D", 1, uctlToDate.ShowDate))
    
-   prgProgress.Value = 1
-   txtPercent.Text = prgProgress.Value
-   Me.Refresh
-   DoEvents
-   '/*REMOVE CONSTRAINTS*/
-   '/*CREATE CONSTRAINTS CASCADE OR SET NULL*/
-   lblProgressDesc.Caption = "กำลัง REMOVE CONSTRAINTS AND CREATE CONSTRAINTS CASCADE OR SET NULL"
-   Me.Refresh
-   DoEvents
+   'Load ยกมา จาก monthly Accum
+   Call LoadIMonthlyAccum(Nothing, MonthlyBeforeAdjustColl, uctlToDate.ShowDate)
    
-' ของเดิมไม่มี
-'   SQL1 = "ALTER TABLE RECEIPT_ITEM DROP CONSTRAINT RECEIPT_ITEM_BILLING_DOC_ID_FK;"
-'   Call m_Conn.Execute(SQL1)
-' ของเดิมไม่มี
-'   SQL1 = "ALTER TABLE RECEIPT_CNDN DROP CONSTRAINT RECEIPT_CNDN_BILLING_DOC_ID_FK;"
-'   Call m_Conn.Execute(SQL1)
-' ของเดิมไม่มี
-'   SQL1 = "ALTER TABLE RECEIPT_CNDN DROP CONSTRAINT RECEIPT_CNDN_DO_ID_FK;"
-'   Call m_Conn.Execute(SQL1)
-' ของเดิมไม่มี
-'   SQL1 = "ALTER TABLE EXPENSE_RATIO DROP CONSTRAINT EXPENSE_RATIO_RO_ITEM_ID_FK;"
-'   Call m_Conn.Execute(SQL1)
-   
-   SQL1 = "ALTER TABLE RECEIPT_ITEM ADD CONSTRAINT RECEIPT_ITEM_BILLING_DOC_ID_FK FOREIGN KEY (BILLING_DOC_ID) REFERENCES BILLING_DOC(BILLING_DOC_ID) ON DELETE CASCADE;"
-   Call m_Conn.Execute(SQL1)
-   
-   SQL1 = "ALTER TABLE RECEIPT_ITEM DROP CONSTRAINT RECEIPT_ITEM_DO_ID_FK;"
-   Call m_Conn.Execute(SQL1)
-   SQL1 = "ALTER TABLE RECEIPT_ITEM ADD CONSTRAINT RECEIPT_ITEM_DO_ID_FK FOREIGN KEY (DO_ID) REFERENCES BILLING_DOC(BILLING_DOC_ID) ON DELETE CASCADE;"
-   Call m_Conn.Execute(SQL1)
-   
-   SQL1 = "ALTER TABLE RECEIPT_CNDN ADD CONSTRAINT RECEIPT_CNDN_BILLING_DOC_ID_FK FOREIGN KEY (BILLING_DOC_ID) REFERENCES BILLING_DOC(BILLING_DOC_ID) ON DELETE CASCADE;"
-   Call m_Conn.Execute(SQL1)
-   
-   SQL1 = "ALTER TABLE RECEIPT_CNDN ADD CONSTRAINT RECEIPT_CNDN_DO_ID_FK FOREIGN KEY (BILLING_DOC_ID) REFERENCES BILLING_DOC(BILLING_DOC_ID) ON DELETE CASCADE;"
-   Call m_Conn.Execute(SQL1)
-   
-   SQL1 = "ALTER TABLE DO_ITEM DROP CONSTRAINT DO_ITEM_DO_ID_FK;"
-   Call m_Conn.Execute(SQL1)
-   SQL1 = "ALTER TABLE DO_ITEM ADD CONSTRAINT DO_ITEM_DO_ID_FK FOREIGN KEY (DO_ID) REFERENCES BILLING_DOC(BILLING_DOC_ID) ON DELETE CASCADE;"
-   Call m_Conn.Execute(SQL1)
-   
-   SQL1 = "ALTER TABLE RO_ITEM DROP CONSTRAINT RO_ITEM_RO_ID_FK;"
-   Call m_Conn.Execute(SQL1)
-   SQL1 = "ALTER TABLE RO_ITEM ADD CONSTRAINT RO_ITEM_RO_ID_FK FOREIGN KEY (BILLING_DOC_ID) REFERENCES BILLING_DOC(BILLING_DOC_ID) ON DELETE CASCADE;"
-   Call m_Conn.Execute(SQL1)
-   
-   SQL1 = "ALTER TABLE CASH_TRAN DROP CONSTRAINT CASH_TRAN_BILLING_DOC_FK;"
-   Call m_Conn.Execute(SQL1)
-   SQL1 = "ALTER TABLE CASH_TRAN ADD CONSTRAINT CASH_TRAN_BILLING_DOC_FK FOREIGN KEY (BILLING_DOC_ID) REFERENCES BILLING_DOC(BILLING_DOC_ID) ON DELETE CASCADE;"
-   Call m_Conn.Execute(SQL1)
-   
-   SQL1 = "ALTER TABLE CASH_TRAN DROP CONSTRAINT CASH_TRAN_CASH_DOC_FK;"
-   Call m_Conn.Execute(SQL1)
-   SQL1 = "ALTER TABLE CASH_TRAN ADD CONSTRAINT CASH_TRAN_CASH_DOC_FK FOREIGN KEY (CASH_DOC_ID) REFERENCES CASH_DOC(CASH_DOC_ID) ON DELETE CASCADE;"
-   Call m_Conn.Execute(SQL1)
-   
-   SQL1 = "ALTER TABLE REVENUE_COST_ITEM DROP CONSTRAINT REVENUE_CTI_REVENUE_ID_FK;"
-   Call m_Conn.Execute(SQL1)
-   SQL1 = "ALTER TABLE REVENUE_COST_ITEM ADD CONSTRAINT REVENUE_CTI_REVENUE_ID_FK FOREIGN KEY (REVENUE_COST_ID) REFERENCES REVENUE_COST(REVENUE_COST_ID) ON DELETE CASCADE;"
-   Call m_Conn.Execute(SQL1)
-   
-   
-   prgProgress.Value = 3
-   txtPercent.Text = prgProgress.Value
-   Me.Refresh
-   DoEvents
-
-   
-   SQL1 = "DELETE FROM EXPENSE_RATIO EPR"
-   SQL1 = SQL1 & " " & "WHERE "
-   SQL1 = SQL1 & " " & "EPR.RO_ITEM_ID NOT IN "
-   SQL1 = SQL1 & " " & "("
-   SQL1 = SQL1 & " " & "SELECT DISTINCT RI.RO_ITEM_ID FROM RO_ITEM RI "
-   SQL1 = SQL1 & " " & ")"
-   Call m_Conn.Execute(SQL1)
-   
-   SQL1 = "ALTER TABLE EXPENSE_RATIO ADD CONSTRAINT EXPENSE_RATIO_RO_ITEM_ID_FK FOREIGN KEY (RO_ITEM_ID) REFERENCES RO_ITEM(RO_ITEM_ID) ON DELETE CASCADE;"
-   Call m_Conn.Execute(SQL1)
-   
-   
-   prgProgress.Value = 5
-   txtPercent.Text = prgProgress.Value
-   Me.Refresh
-   DoEvents
-
-   SQL1 = "ALTER TABLE EXPORT_ITEM DROP CONSTRAINT EXPORT_ITEM_DOC_ID_FK;"
-   Call m_Conn.Execute(SQL1)
-   SQL1 = "ALTER TABLE EXPORT_ITEM ADD CONSTRAINT EXPORT_ITEM_DOC_ID_FK FOREIGN KEY (INVENTORY_DOC_ID) REFERENCES INVENTORY_DOC(INVENTORY_DOC_ID) ON DELETE CASCADE;"
-   Call m_Conn.Execute(SQL1)
-   
-   SQL1 = "ALTER TABLE IMPORT_ITEM DROP CONSTRAINT IMPORT_ITEM_DOC_ID_FK;"
-   Call m_Conn.Execute(SQL1)
-   SQL1 = "ALTER TABLE IMPORT_ITEM ADD CONSTRAINT IMPORT_ITEM_DOC_ID_FK FOREIGN KEY (INVENTORY_DOC_ID) REFERENCES INVENTORY_DOC(INVENTORY_DOC_ID) ON DELETE CASCADE;"
-   Call m_Conn.Execute(SQL1)
-   
+   Call CreateDropFKCadcade
    
    lblProgressDesc.Caption = "ลบเอกสารใบขายสด"
-   prgProgress.Value = 15
+   prgProgress.Value = 10
    txtPercent.Text = prgProgress.Value
    Me.Refresh
    DoEvents
@@ -424,7 +391,7 @@ Dim Ri1_2 As CReceiptItem
    Call m_BillingDoc.SetFlag(False, True, False, False, False, False)
    
    Call glbDaily.QueryBillingDoc(m_BillingDoc, TempRs, itemcount, IsOK, glbErrorLog)
-      
+   
    Call LoadPaidAmountByBill(Nothing, m_PaidAmounts, -1, uctlToDate.ShowDate, , , , uctlToDate.ShowDate)
    Call LoadDnCnAmountByBill(Nothing, m_DnAmounts, -1, uctlToDate.ShowDate, 3, 2, uctlToDate.ShowDate)
    Call LoadDnCnAmountByBill(Nothing, m_CnAmounts, -1, uctlToDate.ShowDate, 4, 2, uctlToDate.ShowDate)
@@ -432,36 +399,35 @@ Dim Ri1_2 As CReceiptItem
    Dim Percent As Double
    I = 0
    While Not TempRs.EOF
-         I = I + 1
-         Percent = 15 + MyDiff(I, itemcount) * 35
-         prgProgress.Value = Percent
-         txtPercent.Text = FormatNumber(Percent)
-                  
-         Call m_BillingDoc.PopulateFromRS(1, TempRs)
-         
-         Set Ri1_0 = GetReceiptItem(m_PaidAmounts, m_BillingDoc.BILLING_DOC_ID) 'รับชำระ
-         Set Ri1_1 = GetReceiptItem(m_DnAmounts, m_BillingDoc.BILLING_DOC_ID) 'เพิ่มหนี้
-         Set Ri1_2 = GetReceiptItem(m_CnAmounts, m_BillingDoc.BILLING_DOC_ID) 'ลดหนี้
-         
-         m_BillingDoc.PAID_AMOUNT = Ri1_0.PAID_AMOUNT
-         m_BillingDoc.DEBIT_AMOUNT = Ri1_1.DEBIT_CREDIT_AMOUNT
-         m_BillingDoc.CREDIT_AMOUNT = Ri1_2.DEBIT_CREDIT_AMOUNT
-        
-         If (m_BillingDoc.DO_TOTAL_PRICE + m_BillingDoc.REVENUE_TOTAL_PRICE - m_BillingDoc.DISCOUNT_AMOUNT + (m_BillingDoc.DEBIT_AMOUNT - m_BillingDoc.CREDIT_AMOUNT) - m_BillingDoc.PAID_AMOUNT) = 0 Then
-            'หนี้เป็น 0 แล้ว ลบเลย
-            SQL1 = "DELETE FROM BILLING_DOC BD"
-            SQL1 = SQL1 & " " & "WHERE (BD.BILLING_DOC_ID = " & m_BillingDoc.BILLING_DOC_ID & ")"
-            Call m_Conn.Execute(SQL1)
-            
-            SQL1 = "DELETE FROM INVENTORY_DOC IVD"
-            SQL1 = SQL1 & " " & "WHERE (IVD.INVENTORY_DOC_ID = " & m_BillingDoc.INVENTORY_DOC_ID & ")"
-            Call m_Conn.Execute(SQL1)
-         End If
-         Me.Refresh
-         TempRs.MoveNext
-      Wend
+      I = I + 1
+      Percent = 15 + MyDiff(I, itemcount) * 35
+      prgProgress.Value = Percent
+      txtPercent.Text = FormatNumber(Percent)
+               
+      Call m_BillingDoc.PopulateFromRS(1, TempRs)
+      
+      Set Ri1_0 = GetReceiptItem(m_PaidAmounts, m_BillingDoc.BILLING_DOC_ID) 'รับชำระ
+      Set Ri1_1 = GetReceiptItem(m_DnAmounts, m_BillingDoc.BILLING_DOC_ID) 'เพิ่มหนี้
+      Set Ri1_2 = GetReceiptItem(m_CnAmounts, m_BillingDoc.BILLING_DOC_ID) 'ลดหนี้
+      
+      m_BillingDoc.PAID_AMOUNT = Ri1_0.PAID_AMOUNT
+      m_BillingDoc.DEBIT_AMOUNT = Ri1_1.DEBIT_CREDIT_AMOUNT
+      m_BillingDoc.CREDIT_AMOUNT = Ri1_2.DEBIT_CREDIT_AMOUNT
+     
+      If (m_BillingDoc.DO_TOTAL_PRICE + m_BillingDoc.REVENUE_TOTAL_PRICE - m_BillingDoc.DISCOUNT_AMOUNT + (m_BillingDoc.DEBIT_AMOUNT - m_BillingDoc.CREDIT_AMOUNT) - m_BillingDoc.PAID_AMOUNT) = 0 Then
+         'หนี้เป็น 0 แล้ว ลบเลย
+         SQL1 = "DELETE FROM BILLING_DOC BD"
+         SQL1 = SQL1 & " " & "WHERE (BD.BILLING_DOC_ID = " & m_BillingDoc.BILLING_DOC_ID & ")"
+         Call m_Conn.Execute(SQL1)
 
-
+         SQL1 = "DELETE FROM INVENTORY_DOC IVD"
+         SQL1 = SQL1 & " " & "WHERE (IVD.INVENTORY_DOC_ID = " & m_BillingDoc.INVENTORY_DOC_ID & ")"
+         Call m_Conn.Execute(SQL1)
+      End If
+      Me.Refresh
+      TempRs.MoveNext
+   Wend
+   
    lblProgressDesc.Caption = "ลบเอกสารใบเสร็จรับชำระ"
    prgProgress.Value = 55
    txtPercent.Text = prgProgress.Value
@@ -507,11 +473,11 @@ Dim Ri1_2 As CReceiptItem
    txtPercent.Text = prgProgress.Value
    Me.Refresh
    DoEvents
-
+   
    SQL1 = "DELETE FROM BALANCE_ACCUM BA"
    SQL1 = SQL1 & " " & "WHERE BA.DOCUMENT_DATE <= '" & ChangeQuote(Trim(TempDate)) & "'"
    Call m_Conn.Execute(SQL1)
-
+   
    SQL1 = "DELETE FROM MONTHLY_ACCUM BA"
    SQL1 = SQL1 & " " & "WHERE BA.DOCUMENT_DATE <= '" & ChangeQuote(Trim(TempDate)) & "'"
    Call m_Conn.Execute(SQL1)
@@ -538,10 +504,136 @@ Dim Ri1_2 As CReceiptItem
    SQL1 = SQL1 & " " & "WHERE (IVTRD.DOCUMENT_TYPE IN (5,9,11,6,7,8,12,888)) AND IVTRD.DOCUMENT_DATE <= '" & ChangeQuote(Trim(TempDate)) & "'"
    Call m_Conn.Execute(SQL1)
    
+   lblProgressDesc.Caption = "กำลัง ปรับยอด STOCK"
+   prgProgress.Value = 75
+   txtPercent.Text = prgProgress.Value
+   Me.Refresh
+   DoEvents
+   
+''''''   'LOAD STOCK BALANCE AFTER ADJUST END YEAR
+   Call LoadPigHouseImportAmount2(Nothing, ImportAfterAdjustColl, -1, uctlToDate.ShowDate)
+   Call LoadPigHouseExportAmount2(Nothing, ExportAfterAdjustColl, -1, uctlToDate.ShowDate)
+   Dim LeftAmount As Double
+   
+   Set Ivd = New CInventoryDoc
+   Ivd.AddEditMode = SHOW_ADD
+    Ivd.DOCUMENT_DATE = uctlToDate.ShowDate
+   Ivd.DOCUMENT_NO = "***ENDYEAR_" & uctlToDate.ShowDate
+   Ivd.DELIVERY_FEE = 0
+   Ivd.DOCUMENT_TYPE = 4
+   Ivd.COMMIT_FLAG = "N"
+   Ivd.EXCEPTION_FLAG = "N"
+   
+   I = 0
+   For Each TempBalance In BalanceBeforeAdjustColl
+      I = I + 1
+      txtPercent.Text = 80 + (MyDiff(I, BalanceBeforeAdjustColl.Count) * 10)
+      prgProgress.Value = Val(txtPercent.Text)
+      Me.Refresh
+      DoEvents
+      
+'      If TempBalance.PART_ITEM_ID = 11073 Then
+'         Debug.Print TempBalance.PART_ITEM_ID & "-" & TempBalance.LOCATION_ID & "-" & TempBalance.BALANCE_AMOUNT
+'      End If
+      
+      Set TempImport = GetImportItem(ImportAfterAdjustColl, Trim(TempBalance.PART_ITEM_ID & "-" & TempBalance.LOCATION_ID))
+      Set TempExport = GetExportItem(ExportAfterAdjustColl, Trim(TempBalance.PART_ITEM_ID & "-" & TempBalance.LOCATION_ID))
+      
+      LeftAmount = TempImport.IMPORT_AMOUNT - TempExport.EXPORT_AMOUNT
+      
+      If (TempBalance.BALANCE_AMOUNT > LeftAmount) Then
+         Set TempImport = New CImportItem
+         TempImport.TX_TYPE = "I"
+         TempImport.Flag = "A"
+         TempImport.PART_ITEM_ID = TempBalance.PART_ITEM_ID
+         TempImport.LOCATION_ID = TempBalance.LOCATION_ID
+         
+         TempImport.IMPORT_AMOUNT = TempBalance.BALANCE_AMOUNT - LeftAmount
+         TempImport.TOTAL_INCLUDE_PRICE = TempBalance.TOTAL_INCLUDE_PRICE - (TempImport.TOTAL_INCLUDE_PRICE - TempExport.EXPORT_TOTAL_PRICE)
+         
+         Call Ivd.ImportExports.Add(TempImport)
+      ElseIf (TempBalance.BALANCE_AMOUNT < LeftAmount) Then
+         Set TempExport = New CExportItem
+         TempExport.TX_TYPE = "E"
+         TempExport.Flag = "A"
+         TempExport.PART_ITEM_ID = TempBalance.PART_ITEM_ID
+         TempExport.LOCATION_ID = TempBalance.LOCATION_ID
+         
+         TempExport.EXPORT_AMOUNT = LeftAmount - TempBalance.BALANCE_AMOUNT
+         TempExport.EXPORT_TOTAL_PRICE = (TempImport.TOTAL_INCLUDE_PRICE - TempExport.EXPORT_TOTAL_PRICE) - TempBalance.TOTAL_INCLUDE_PRICE
+         
+         Call Ivd.ImportExports.Add(TempExport)
+      End If
+      
+      Set TempImport = Nothing
+      Set TempExport = Nothing
+   Next TempBalance
+   
+   If Ivd.ImportExports.Count > 0 Then
+      If Not glbDaily.AddEditInventoryDoc(Ivd, True, True, glbErrorLog) Then
+         glbErrorLog.ShowErrorLog (LOG_FILE_MSGBOX)
+         Exit Function
+      End If
+   End If
+   
+   I = 0
+   For Each TempBalance In BalanceBeforeAdjustColl
+      I = I + 1
+      txtPercent.Text = 90 + (MyDiff(I, BalanceBeforeAdjustColl.Count) * 5)
+      prgProgress.Value = Val(txtPercent.Text)
+      Me.Refresh
+      DoEvents
+      
+      TempBalance.AddEditMode = SHOW_ADD
+      TempBalance.DOCUMENT_DATE = uctlToDate.ShowDate
+      TempBalance.IMPORT_AMOUNT = TempBalance.BALANCE_AMOUNT
+      TempBalance.EXPORT_AMOUNT = 0
+      Call TempBalance.AddEditData
+   Next TempBalance
+   
+   I = 0
+   For Each TempMonthly In MonthlyBeforeAdjustColl
+      I = I + 1
+      txtPercent.Text = 95 + (MyDiff(I, MonthlyBeforeAdjustColl.Count) * 5)
+      prgProgress.Value = Val(txtPercent.Text)
+      Me.Refresh
+      DoEvents
+      
+      TempMonthly.AddEditMode = SHOW_ADD
+      TempMonthly.DOCUMENT_DATE = uctlToDate.ShowDate
+      
+      Call TempMonthly.AddEditData
+   Next TempMonthly
+   
+   
+   Set Ivd = Nothing
+   
+   prgProgress.Value = prgProgress.MAX
+   txtPercent.Text = 100
+   Me.Refresh
+   DoEvents
+   
+   Set BalanceBeforeAdjustColl = Nothing
+   Set ImportAfterAdjustColl = Nothing
+   Set ExportAfterAdjustColl = Nothing
+   
+   AdjustStockCode = True
+End Function
+Private Function AdjustFK() As Boolean
+Dim I As Long
+Dim IsOK As Boolean
+Dim SQL1 As String
+   
+   I = 0
+   prgProgress.MIN = 0
+   prgProgress.MAX = 100
+   
+   AdjustFK = False
+   
    '/*REMOVE CONSTRAINTS*/
    '/*CREATE CONSTRAINTS*/
    lblProgressDesc.Caption = "กำลัง REMOVE CONSTRAINTS AND CREATE CONSTRAINTS"
-   prgProgress.Value = 75
+   prgProgress.Value = 5
    txtPercent.Text = prgProgress.Value
    Me.Refresh
    DoEvents
@@ -569,7 +661,7 @@ Dim Ri1_2 As CReceiptItem
    SQL1 = "ALTER TABLE RECEIPT_CNDN ADD CONSTRAINT RECEIPT_CNDN_BILLING_DOC_ID_FK FOREIGN KEY (BILLING_DOC_ID) REFERENCES BILLING_DOC(BILLING_DOC_ID);"
    Call m_Conn.Execute(SQL1)
    
-   SQL1 = "ALTER TABLE RECEIPT_CNDN ADD CONSTRAINT RECEIPT_CNDN_DO_ID_FK FOREIGN KEY (BILLING_DOC_ID) REFERENCES BILLING_DOC(BILLING_DOC_ID);"
+   SQL1 = "ALTER TABLE RECEIPT_CNDN ADD CONSTRAINT RECEIPT_CNDN_DO_ID_FK FOREIGN KEY (DO_ID) REFERENCES BILLING_DOC(BILLING_DOC_ID);"
    Call m_Conn.Execute(SQL1)
    
    SQL1 = "ALTER TABLE DO_ITEM DROP CONSTRAINT DO_ITEM_DO_ID_FK;"
@@ -581,6 +673,12 @@ Dim Ri1_2 As CReceiptItem
    Call m_Conn.Execute(SQL1)
    SQL1 = "ALTER TABLE RO_ITEM ADD CONSTRAINT RO_ITEM_RO_ID_FK FOREIGN KEY (BILLING_DOC_ID) REFERENCES BILLING_DOC(BILLING_DOC_ID);"
    Call m_Conn.Execute(SQL1)
+      
+    lblProgressDesc.Caption = "กำลัง REMOVE CONSTRAINTS AND CREATE CONSTRAINTS"
+   prgProgress.Value = 50
+   txtPercent.Text = prgProgress.Value
+   Me.Refresh
+   DoEvents
    
    SQL1 = "ALTER TABLE CASH_TRAN DROP CONSTRAINT CASH_TRAN_BILLING_DOC_FK;"
    Call m_Conn.Execute(SQL1)
@@ -596,88 +694,126 @@ Dim Ri1_2 As CReceiptItem
    Call m_Conn.Execute(SQL1)
    SQL1 = "ALTER TABLE REVENUE_COST_ITEM ADD CONSTRAINT REVENUE_CTI_REVENUE_ID_FK FOREIGN KEY (REVENUE_COST_ID) REFERENCES REVENUE_COST(REVENUE_COST_ID);"
    Call m_Conn.Execute(SQL1)
-      
    
-   lblProgressDesc.Caption = "กำลัง ปรับยอด STOCK"
-   prgProgress.Value = 80
-   txtPercent.Text = prgProgress.Value
-   Me.Refresh
-   DoEvents
    
-''''''   'LOAD STOCK BALANCE AFTER ADJUST END YEAR
-   Call LoadInventoryBalanceEx(Nothing, BalanceAferAdjustColl, DateAdd("D", 1, uctlToDate.ShowDate))
+   SQL1 = "ALTER TABLE EXPENSE_RATIO ADD CONSTRAINT EXPENSE_RATIO_RO_ITEM_ID_FK FOREIGN KEY (RO_ITEM_ID) REFERENCES RO_ITEM(RO_ITEM_ID);"
+   Call m_Conn.Execute(SQL1)
    
-   Set Ivd = New CInventoryDoc
-   Ivd.AddEditMode = SHOW_ADD
-    Ivd.DOCUMENT_DATE = uctlToDate.ShowDate
-   Ivd.DOCUMENT_NO = "***ENDYEAR_" & uctlToDate.ShowDate
-   Ivd.DELIVERY_FEE = 0
-   Ivd.DOCUMENT_TYPE = 4
-   Ivd.COMMIT_FLAG = "N"
-   Ivd.EXCEPTION_FLAG = "N"
+   SQL1 = "ALTER TABLE EXPORT_ITEM DROP CONSTRAINT EXPORT_ITEM_DOC_ID_FK;"
+   Call m_Conn.Execute(SQL1)
+   SQL1 = "ALTER TABLE EXPORT_ITEM ADD CONSTRAINT EXPORT_ITEM_DOC_ID_FK FOREIGN KEY (INVENTORY_DOC_ID) REFERENCES INVENTORY_DOC(INVENTORY_DOC_ID);"
+   Call m_Conn.Execute(SQL1)
    
-   I = 0
-   For Each tempBalance In BalanceBeforeAdjustColl
-      I = I + 1
-      txtPercent.Text = 80 + (MyDiff(I, BalanceBeforeAdjustColl.Count) * 10)
-      prgProgress.Value = Val(txtPercent.Text)
-      Me.Refresh
-      DoEvents
-      
-      Set tempBalanceAfter = GetObject("CLotItem", BalanceAferAdjustColl, Trim(tempBalance.LOCATION_ID & "-" & tempBalance.PART_ITEM_ID))
-   
-      If (tempBalance.BALANCE_AMOUNT > tempBalanceAfter.BALANCE_AMOUNT) Then
-         Set tempImport = New CImportItem
-         tempImport.Flag = "A"
-         tempImport.PART_ITEM_ID = tempBalance.PART_ITEM_ID
-         tempImport.LOCATION_ID = tempBalance.LOCATION_ID
-         
-         tempImport.ACTUAL_AMOUNT = tempBalance.BALANCE_AMOUNT - tempBalanceAfter.BALANCE_AMOUNT
-         tempImport.ACTUAL_PRICE = tempBalance.TOTAL_INCLUDE_PRICE - tempBalanceAfter.TOTAL_INCLUDE_PRICE
-   
-      Else
-            
-      End If
-      
-''''''      TempLotItem.Flag = "A"
-''''''      TempLotItem.PART_ITEM_ID = m_LotItem.PART_ITEM_ID
-''''''      TempLotItem.LOCATION_ID = m_LotItem.LOCATION_ID
-''''''
-''''''      Set TempLotItemSearch = GetObject("CLotItem", InventoryBalAferAdjustColl, Trim(m_LotItem.LOCATION_ID & "-" & m_LotItem.PART_ITEM_ID))
-''''''      If (m_LotItem.SUM_AMOUNT > TempLotItemSearch.SUM_AMOUNT) Then  'ก่อนปรับมากกว่าหลังปรับ ต้องปรับเพิ่ม
-''''''         TempLotItem.TX_AMOUNT = m_LotItem.SUM_AMOUNT - TempLotItemSearch.SUM_AMOUNT
-''''''         TempLotItem.MULTIPLIER = 1
-''''''         TempLotItem.TX_TYPE = "I"
-''''''      ElseIf (m_LotItem.SUM_AMOUNT < TempLotItemSearch.SUM_AMOUNT) Then
-''''''         TempLotItem.TX_AMOUNT = TempLotItemSearch.SUM_AMOUNT - m_LotItem.SUM_AMOUNT
-''''''         TempLotItem.MULTIPLIER = -1
-''''''         TempLotItem.TX_TYPE = "E"
-''''''      End If
-''''''      Set Pi = GetObject("CStockCode", TempPartColl, Trim(Str(m_LotItem.PART_ITEM_ID)))
-''''''      TempLotItem.UNIT_TRAN_ID = Pi.UNIT_CHANGE_ID
-''''''      TempLotItem.UNIT_MULTIPLE = 1
-''''''
-''''''      Call Ivd.ImportExportItems.Add(TempLotItem)
-''''''
-''''''      Set TempLotItem = Nothing
-   Next tempBalance
-   
-''''''   If Ivd.ImportExportItems.Count > 0 Then
-''''''      If Not glbDaily.AddEditInventoryDoc(Ivd, True, False, glbErrorLog) Then
-''''''         glbErrorLog.ShowErrorLog (LOG_FILE_MSGBOX)
-''''''         Exit Function
-''''''      End If
-''''''   End If
-   
-   Set Ivd = Nothing
+   SQL1 = "ALTER TABLE IMPORT_ITEM DROP CONSTRAINT IMPORT_ITEM_DOC_ID_FK;"
+   Call m_Conn.Execute(SQL1)
+   SQL1 = "ALTER TABLE IMPORT_ITEM ADD CONSTRAINT IMPORT_ITEM_DOC_ID_FK FOREIGN KEY (INVENTORY_DOC_ID) REFERENCES INVENTORY_DOC(INVENTORY_DOC_ID);"
+   Call m_Conn.Execute(SQL1)
    
    prgProgress.Value = prgProgress.MAX
    txtPercent.Text = 100
    Me.Refresh
    DoEvents
    
-   Set BalanceBeforeAdjustColl = Nothing
-   Set BalanceAferAdjustColl = Nothing
+   AdjustFK = True
+End Function
+Private Function CreateDropFKCadcade()
+On Error Resume Next
+Dim SQL1 As String
+
+   prgProgress.Value = 1
+   txtPercent.Text = prgProgress.Value
+   Me.Refresh
+   DoEvents
+   '/*REMOVE CONSTRAINTS*/
+   '/*CREATE CONSTRAINTS CASCADE OR SET NULL*/
+   lblProgressDesc.Caption = "กำลัง REMOVE CONSTRAINTS AND CREATE CONSTRAINTS CASCADE OR SET NULL"
+   Me.Refresh
+   DoEvents
    
-   AdjustStockCode = True
+' ของเดิมไม่มี
+   SQL1 = "ALTER TABLE RECEIPT_ITEM DROP CONSTRAINT RECEIPT_ITEM_BILLING_DOC_ID_FK;"
+   Call m_Conn.Execute(SQL1)
+' ของเดิมไม่มี
+   SQL1 = "ALTER TABLE RECEIPT_CNDN DROP CONSTRAINT RECEIPT_CNDN_BILLING_DOC_ID_FK;"
+   Call m_Conn.Execute(SQL1)
+' ของเดิมไม่มี
+   SQL1 = "ALTER TABLE RECEIPT_CNDN DROP CONSTRAINT RECEIPT_CNDN_DO_ID_FK;"
+   Call m_Conn.Execute(SQL1)
+' ของเดิมไม่มี
+   SQL1 = "ALTER TABLE EXPENSE_RATIO DROP CONSTRAINT EXPENSE_RATIO_RO_ITEM_ID_FK;"
+   Call m_Conn.Execute(SQL1)
+   
+   SQL1 = "ALTER TABLE RECEIPT_ITEM ADD CONSTRAINT RECEIPT_ITEM_BILLING_DOC_ID_FK FOREIGN KEY (BILLING_DOC_ID) REFERENCES BILLING_DOC(BILLING_DOC_ID) ON DELETE CASCADE;"
+   Call m_Conn.Execute(SQL1)
+   
+   SQL1 = "ALTER TABLE RECEIPT_ITEM DROP CONSTRAINT RECEIPT_ITEM_DO_ID_FK;"
+   Call m_Conn.Execute(SQL1)
+   SQL1 = "ALTER TABLE RECEIPT_ITEM ADD CONSTRAINT RECEIPT_ITEM_DO_ID_FK FOREIGN KEY (DO_ID) REFERENCES BILLING_DOC(BILLING_DOC_ID) ON DELETE CASCADE;"
+   Call m_Conn.Execute(SQL1)
+   
+   SQL1 = "ALTER TABLE RECEIPT_CNDN ADD CONSTRAINT RECEIPT_CNDN_BILLING_DOC_ID_FK FOREIGN KEY (BILLING_DOC_ID) REFERENCES BILLING_DOC(BILLING_DOC_ID) ON DELETE CASCADE;"
+   Call m_Conn.Execute(SQL1)
+   
+   SQL1 = "ALTER TABLE RECEIPT_CNDN ADD CONSTRAINT RECEIPT_CNDN_DO_ID_FK FOREIGN KEY (DO_ID) REFERENCES BILLING_DOC(BILLING_DOC_ID) ON DELETE CASCADE;"
+   Call m_Conn.Execute(SQL1)
+   
+   SQL1 = "ALTER TABLE DO_ITEM DROP CONSTRAINT DO_ITEM_DO_ID_FK;"
+   Call m_Conn.Execute(SQL1)
+   SQL1 = "ALTER TABLE DO_ITEM ADD CONSTRAINT DO_ITEM_DO_ID_FK FOREIGN KEY (DO_ID) REFERENCES BILLING_DOC(BILLING_DOC_ID) ON DELETE CASCADE;"
+   Call m_Conn.Execute(SQL1)
+   
+   SQL1 = "ALTER TABLE RO_ITEM DROP CONSTRAINT RO_ITEM_RO_ID_FK;"
+   Call m_Conn.Execute(SQL1)
+   SQL1 = "ALTER TABLE RO_ITEM ADD CONSTRAINT RO_ITEM_RO_ID_FK FOREIGN KEY (BILLING_DOC_ID) REFERENCES BILLING_DOC(BILLING_DOC_ID) ON DELETE CASCADE;"
+   Call m_Conn.Execute(SQL1)
+   
+   SQL1 = "ALTER TABLE CASH_TRAN DROP CONSTRAINT CASH_TRAN_BILLING_DOC_FK;"
+   Call m_Conn.Execute(SQL1)
+   SQL1 = "ALTER TABLE CASH_TRAN ADD CONSTRAINT CASH_TRAN_BILLING_DOC_FK FOREIGN KEY (BILLING_DOC_ID) REFERENCES BILLING_DOC(BILLING_DOC_ID) ON DELETE CASCADE;"
+   Call m_Conn.Execute(SQL1)
+   
+   SQL1 = "ALTER TABLE CASH_TRAN DROP CONSTRAINT CASH_TRAN_CASH_DOC_FK;"
+   Call m_Conn.Execute(SQL1)
+   SQL1 = "ALTER TABLE CASH_TRAN ADD CONSTRAINT CASH_TRAN_CASH_DOC_FK FOREIGN KEY (CASH_DOC_ID) REFERENCES CASH_DOC(CASH_DOC_ID) ON DELETE CASCADE;"
+   Call m_Conn.Execute(SQL1)
+   
+   SQL1 = "ALTER TABLE REVENUE_COST_ITEM DROP CONSTRAINT REVENUE_CTI_REVENUE_ID_FK;"
+   Call m_Conn.Execute(SQL1)
+   SQL1 = "ALTER TABLE REVENUE_COST_ITEM ADD CONSTRAINT REVENUE_CTI_REVENUE_ID_FK FOREIGN KEY (REVENUE_COST_ID) REFERENCES REVENUE_COST(REVENUE_COST_ID) ON DELETE CASCADE;"
+   Call m_Conn.Execute(SQL1)
+   
+   
+   prgProgress.Value = 3
+   txtPercent.Text = prgProgress.Value
+   Me.Refresh
+   DoEvents
+   
+   'ที่ลบแบบนี้เพราะเดิมทีมี บาง Record ที่มันไม่มี Reference
+   SQL1 = "DELETE FROM EXPENSE_RATIO EPR"
+   SQL1 = SQL1 & " " & "WHERE "
+   SQL1 = SQL1 & " " & "EPR.RO_ITEM_ID NOT IN "
+   SQL1 = SQL1 & " " & "("
+   SQL1 = SQL1 & " " & "SELECT DISTINCT RI.RO_ITEM_ID FROM RO_ITEM RI "
+   SQL1 = SQL1 & " " & ")"
+   Call m_Conn.Execute(SQL1)
+   
+   SQL1 = "ALTER TABLE EXPENSE_RATIO ADD CONSTRAINT EXPENSE_RATIO_RO_ITEM_ID_FK FOREIGN KEY (RO_ITEM_ID) REFERENCES RO_ITEM(RO_ITEM_ID) ON DELETE CASCADE;"
+   Call m_Conn.Execute(SQL1)
+   
+   
+   prgProgress.Value = 5
+   txtPercent.Text = prgProgress.Value
+   Me.Refresh
+   DoEvents
+
+   SQL1 = "ALTER TABLE EXPORT_ITEM DROP CONSTRAINT EXPORT_ITEM_DOC_ID_FK;"
+   Call m_Conn.Execute(SQL1)
+   SQL1 = "ALTER TABLE EXPORT_ITEM ADD CONSTRAINT EXPORT_ITEM_DOC_ID_FK FOREIGN KEY (INVENTORY_DOC_ID) REFERENCES INVENTORY_DOC(INVENTORY_DOC_ID) ON DELETE CASCADE;"
+   Call m_Conn.Execute(SQL1)
+   
+   SQL1 = "ALTER TABLE IMPORT_ITEM DROP CONSTRAINT IMPORT_ITEM_DOC_ID_FK;"
+   Call m_Conn.Execute(SQL1)
+   SQL1 = "ALTER TABLE IMPORT_ITEM ADD CONSTRAINT IMPORT_ITEM_DOC_ID_FK FOREIGN KEY (INVENTORY_DOC_ID) REFERENCES INVENTORY_DOC(INVENTORY_DOC_ID) ON DELETE CASCADE;"
+   Call m_Conn.Execute(SQL1)
+   
 End Function
