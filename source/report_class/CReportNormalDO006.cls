@@ -324,8 +324,8 @@ Dim TaxBranchString As String
    Vsp.TableCell(tcCols) = 2
    Vsp.TableCell(tcRows) = 2
    Vsp.TableCell(tcRowHeight, 1) = 0.7 * 567 + HeaderOffset
-   Vsp.TableCell(tcColWidth, 1, 1) = "4.7cm"
-   Vsp.TableCell(tcColWidth, 1, 2) = "13.7cm"
+   Vsp.TableCell(tcColWidth, 1, 1) = "4cm"
+   Vsp.TableCell(tcColWidth, 1, 2) = "14.4cm"
    Vsp.TableCell(tcFontSize) = 14
 
    

@@ -1,6 +1,6 @@
 VERSION 5.00
 Object = "{0BA686C6-F7D3-101A-993E-0000C0EF6F5E}#2.0#0"; "THREED20.OCX"
-Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.0#0"; "mscomctl.ocx"
+Object = "{831FDD16-0C5C-11D2-A9FC-0000F8754DA1}#2.2#0"; "MSCOMCTL.OCX"
 Begin VB.Form frmWinPricingMain 
    BorderStyle     =   1  'Fixed Single
    ClientHeight    =   8520
@@ -867,7 +867,7 @@ Dim Node As Node
 End Sub
 
 Private Sub InitFormLayout()
-   Call InitNormalLabel(lblUserName, MapText("ผู้ใช้ : "), RGB(0, 0, 255))
+   Call InitNormalLabel(lblUsername, MapText("ผู้ใช้ : "), RGB(0, 0, 255))
    Call InitNormalLabel(lblUserGroup, MapText("กลุ่มผู้ใช้ : "), RGB(0, 0, 255))
    Call InitNormalLabel(lblVersion, MapText("เวอร์ชัน : ") & glbParameterObj.Version & " (Interbase) ", RGB(0, 0, 255))
    Call InitNormalLabel(lblDateTime, "", RGB(0, 0, 255))
@@ -2167,7 +2167,7 @@ Private Sub Timer1_Timer()
    
    lblDateTime.Caption = "                                                    "
    lblDateTime.Caption = DateToStringExtEx3(Now)
-   lblUserName.Caption = MapText("ผู้ใช้ : ") & " " & glbUser.USER_NAME
+   lblUsername.Caption = MapText("ผู้ใช้ : ") & " " & glbUser.USER_NAME
    lblUserGroup.Caption = MapText("กลุ่มผู้ใช้ : ") & " " & glbUser.GROUP_NAME
    
   Timer1.Enabled = True

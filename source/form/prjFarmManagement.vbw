@@ -1,9 +1,9 @@
-frmWinPricingMain = 127, 117, 1298, 762, , 182, 182, 1353, 832, C
+frmWinPricingMain = 127, 117, 1298, 762, Z, 182, 182, 1353, 832, C
 modMain = 146, 62, 1475, 712, C
 modRegistry = 0, 0, 0, 0, C
 modTokenLib = 260, 260, 1231, 910, C
 clsRegistry = 0, 0, 0, 0, C
-cPopupMenu = 0, 0, 0, 0, C
+cPopupMenu = 52, 52, 1398, 676, 
 clsGlobalSetting = 0, 0, 0, 0, C
 clsParameter = 0, 0, 0, 0, C
 clsErrorLog = 0, 0, 0, 0, C
