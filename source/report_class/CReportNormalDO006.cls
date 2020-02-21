@@ -274,9 +274,9 @@ Dim TaxBranchString As String
    Vsp.TableCell(tcCols) = 4
    Vsp.TableCell(tcRows) = 2
    Vsp.TableCell(tcRowHeight, 1) = 0.7 * 567
-   Vsp.TableCell(tcColWidth, 1, 1) = "4cm"
+   Vsp.TableCell(tcColWidth, 1, 1) = "3.9cm"
    Vsp.TableCell(tcColWidth, 1, 2) = "7.7cm"
-   Vsp.TableCell(tcColWidth, 1, 3) = "3.7cm"
+   Vsp.TableCell(tcColWidth, 1, 3) = "3.8cm"
    Vsp.TableCell(tcColWidth, 1, 4) = "3cm"
    Vsp.TableCell(tcFontSize) = 14
 
@@ -285,7 +285,7 @@ Dim TaxBranchString As String
    Vsp.TableCell(tcText, 1, 1) = "รหัสลูกค้า/Customer Code"
    
    If Len(m_TempBD.TAX_ID) > 0 Then
-      TaxBranchString = " TAX ID : " & m_TempBD.TAX_ID
+      TaxBranchString = "TAX ID : " & m_TempBD.TAX_ID
    End If
    If Len(m_TempBD.CUSTOMER_BRANCH) > 0 Then
       TaxBranchString = TaxBranchString & " " & m_TempBD.CUSTOMER_BRANCH
@@ -324,8 +324,8 @@ Dim TaxBranchString As String
    Vsp.TableCell(tcCols) = 2
    Vsp.TableCell(tcRows) = 2
    Vsp.TableCell(tcRowHeight, 1) = 0.7 * 567 + HeaderOffset
-   Vsp.TableCell(tcColWidth, 1, 1) = "4cm"
-   Vsp.TableCell(tcColWidth, 1, 2) = "14.4cm"
+   Vsp.TableCell(tcColWidth, 1, 1) = "3.9cm"
+   Vsp.TableCell(tcColWidth, 1, 2) = "14.5cm"
    Vsp.TableCell(tcFontSize) = 14
 
    
